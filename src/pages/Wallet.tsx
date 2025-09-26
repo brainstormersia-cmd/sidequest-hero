@@ -1,0 +1,273 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const TransactionItem = ({ 
+  title, 
+  description, 
+  amount, 
+  type, 
+  status,
+  date 
+}: { 
+  title: string; 
+  description: string; 
+  amount: number; 
+  type: "income" | "outcome" | "pending";
+  status?: "completed" | "pending" | "escrow";
+  date: string; 
+}) => {
+  const getIcon = () => {
+    if (status === "pending" || status === "escrow") return <Clock className="w-5 h-5 text-warning" />;
+    if (type === "income") return <ArrowDownRight className="w-5 h-5 text-success" />;
+    return <ArrowUpRight className="w-5 h-5 text-muted-foreground" />;
+  };
+
+  const getAmountColor = () => {
+    if (status === "pending" || status === "escrow") return "text-warning";
+    if (type === "income") return "text-success";
+    return "text-muted-foreground";
+  };
+
+  return (
+    <div className="flex items-center gap-3 p-4 hover:bg-muted/50 rounded-xl transition-smooth cursor-pointer">
+      <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center flex-shrink-0">
+        {getIcon()}
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="font-medium text-foreground text-sm">{title}</h4>
+        <p className="text-xs text-muted-foreground line-clamp-1">{description}</p>
+        <p className="text-xs text-muted-foreground mt-1">{date}</p>
+      </div>
+      <div className="text-right">
+        <p className={`font-semibold ${getAmountColor()}`}>
+          {type === "income" ? "+" : ""}€{Math.abs(amount).toFixed(2)}
+        </p>
+        {status && (
+          <p className="text-xs text-muted-foreground capitalize">{status}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Wallet = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [balance] = useState(127.50);
+  const [pendingBalance] = useState(45.00);
+  const [rechargeAmount, setRechargeAmount] = useState("");
+  const [isRechargeOpen, setIsRechargeOpen] = useState(false);
+
+  const transactions = [
+    {
+      title: "Consegna pacchi completata",
+      description: "Missione: Centro città - Marco Rossi",
+      amount: 25.00,
+      type: "income" as const,
+      status: "completed" as const,
+      date: "2 ore fa"
+    },
+    {
+      title: "Pagamento in escrow",
+      description: "Missione: Dog sitting - Sofia Bianchi",
+      amount: 60.00,
+      type: "income" as const,
+      status: "escrow" as const,
+      date: "1 giorno fa"
+    },
+    {
+      title: "Spesa settimanale",
+      description: "Completata - Anna Verdi",
+      amount: 15.00,
+      type: "income" as const,
+      status: "completed" as const,
+      date: "3 giorni fa"
+    },
+    {
+      title: "Ricarica wallet",
+      description: "Carta di credito ****1234",
+      amount: 50.00,
+      type: "income" as const,
+      status: "completed" as const,
+      date: "1 settimana fa"
+    },
+    {
+      title: "Commissione SideQuest",
+      description: "5% su missione completata",
+      amount: -1.25,
+      type: "outcome" as const,
+      status: "completed" as const,
+      date: "2 ore fa"
+    }
+  ];
+
+  const handleRecharge = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = parseFloat(rechargeAmount);
+    if (amount >= 10 && amount <= 500) {
+      toast({
+        title: "Ricarica in corso",
+        description: `Ricarica di €${amount.toFixed(2)} in elaborazione`,
+      });
+      setRechargeAmount("");
+      setIsRechargeOpen(false);
+    } else {
+      toast({
+        title: "Importo non valido",
+        description: "L'importo deve essere tra €10 e €500",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-6">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => navigate("/dashboard")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-bold text-foreground">Portafoglio</h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6 py-6 space-y-6">
+        {/* Balance Card */}
+        <Card className="p-6 bg-gradient-hero border-0 shadow-floating text-secondary-foreground">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <WalletIcon className="w-6 h-6" />
+              <span className="text-sm font-medium opacity-90">Saldo disponibile</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4">€{balance.toFixed(2)}</h2>
+            
+            {pendingBalance > 0 && (
+              <div className="bg-secondary-foreground/10 rounded-xl p-3 mb-4">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Clock className="w-4 h-4 text-warning" />
+                  <span className="text-sm font-medium">In sospeso</span>
+                </div>
+                <p className="text-lg font-semibold">€{pendingBalance.toFixed(2)}</p>
+                <p className="text-xs opacity-75">In attesa di conferma completamento</p>
+              </div>
+            )}
+            
+            <Dialog open={isRechargeOpen} onOpenChange={setIsRechargeOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90 shadow-card transition-bounce hover:scale-105"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ricarica
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="mx-6 rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle className="text-center">Ricarica Wallet</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleRecharge} className="space-y-4">
+                  <div>
+                    <Label htmlFor="amount">Importo (€10 - €500)</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      min="10"
+                      max="500"
+                      step="0.01"
+                      value={rechargeAmount}
+                      onChange={(e) => setRechargeAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-3 p-3 border border-border rounded-xl">
+                    <CreditCard className="w-5 h-5 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Carta di credito</p>
+                      <p className="text-xs text-muted-foreground">****1234</p>
+                    </div>
+                    <CheckCircle className="w-5 h-5 text-success" />
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    Conferma ricarica
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs defaultValue="balance" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 rounded-xl">
+            <TabsTrigger value="balance" className="rounded-lg">💰 Saldo</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg">📜 Cronologia</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="balance" className="mt-6 space-y-4">
+            <Card className="p-4 bg-card shadow-card border-0">
+              <h3 className="font-semibold text-foreground mb-3">Statistiche</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-success">€312</p>
+                  <p className="text-sm text-muted-foreground">Guadagni totali</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-foreground">18</p>
+                  <p className="text-sm text-muted-foreground">Missioni pagate</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-4 bg-card shadow-card border-0">
+              <h3 className="font-semibold text-foreground mb-3">Metodi di pagamento</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 border border-border rounded-xl">
+                  <CreditCard className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Visa ****1234</p>
+                    <p className="text-xs text-muted-foreground">Scade 12/26</p>
+                  </div>
+                  <Button variant="ghost" size="sm">Modifica</Button>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <Card className="bg-card shadow-card border-0 overflow-hidden">
+              <div className="p-4 border-b border-border/50">
+                <h3 className="font-semibold text-foreground">Transazioni recenti</h3>
+              </div>
+              <div className="divide-y divide-border/50">
+                {transactions.map((transaction, index) => (
+                  <TransactionItem key={index} {...transaction} />
+                ))}
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Wallet;

@@ -1,96 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SideQuest Design System - Mobile-First Mission Management App */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    /* SideQuest Brand Colors */
+    --background: 210 20% 98%; /* #F9FAFB */
+    --foreground: 220 14% 11%; /* #1C1C1E */
+    
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 220 14% 11%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --popover-foreground: 220 14% 11%;
+    
+    /* Primary Brand Yellow */
+    --primary: 48 100% 52%; /* #FFD60A */
+    --primary-foreground: 220 14% 11%;
+    
+    /* Secondary Petrol Blue */
+    --secondary: 208 100% 20%; /* #003566 */
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 210 20% 98%;
+    --muted-foreground: 215 13% 50%; /* #6B7280 */
+    
+    --accent: 48 100% 52%;
+    --accent-foreground: 220 14% 11%;
+    
+    /* Status Colors */
+    --success: 145 63% 49%; /* #2ECC71 */
+    --success-foreground: 0 0% 100%;
+    
+    --destructive: 354 70% 54%; /* #E63946 */
+    --destructive-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%; /* #F59E0B */
+    --warning-foreground: 220 14% 11%;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 48 100% 52%;
+    
+    --radius: 12px;
+    
+    /* SideQuest Custom Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    --gradient-card: linear-gradient(180deg, hsl(var(--card)), hsl(210 20% 96%));
+    
+    /* Shadows */
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-floating: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    /* Animation Timings */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
-
+  
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 27% 6%;
     --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
+    --card: 220 27% 8%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 27% 8%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --primary: 48 100% 52%;
+    --primary-foreground: 220 14% 11%;
+    --secondary: 208 100% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 27% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 48 100% 52%;
+    --accent-foreground: 220 14% 11%;
+    --border: 220 27% 12%;
+    --input: 220 27% 12%;
+    --ring: 48 100% 52%;
   }
 }
 
@@ -98,8 +87,68 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* SideQuest Component Styles */
+  .mission-card {
+    @apply bg-card rounded-2xl p-4 shadow-[var(--shadow-card)] border border-border/50 transition-[var(--transition-smooth)] hover:scale-[1.02] hover:shadow-[var(--shadow-floating)];
+  }
+  
+  .floating-button {
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-[var(--shadow-floating)] transition-[var(--transition-bounce)] hover:scale-110 active:scale-95 flex items-center justify-center;
+  }
+  
+  .wallet-pill {
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-full font-medium shadow-[var(--shadow-soft)];
+  }
+  
+  .status-badge {
+    @apply px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .status-open {
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+  
+  .status-progress {
+    @apply bg-secondary/10 text-secondary border border-secondary/20;
+  }
+  
+  .status-completed {
+    @apply bg-success/10 text-success border border-success/20;
+  }
+  
+  .chat-bubble {
+    @apply max-w-[280px] rounded-2xl px-4 py-2 text-sm;
+  }
+  
+  .chat-bubble-runner {
+    @apply bg-primary text-primary-foreground ml-auto rounded-br-md;
+  }
+  
+  .chat-bubble-owner {
+    @apply bg-muted text-foreground mr-auto rounded-bl-md;
+  }
+  
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+}
+
+@layer utilities {
+  .font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
   }
 }
