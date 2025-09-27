@@ -1,11 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Clock, Euro, Star, MessageSquare, Flag, User, Truck } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, MapPin, Clock, Euro, Star, MessageSquare, Flag, User, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface Mission {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  location: string;
+  duration_hours: number;
+  status: 'open' | 'in_progress' | 'pending_completion' | 'completed' | 'cancelled';
+  created_at: string;
+  profiles: {
+    first_name: string;
+    last_name: string;
+    rating_average: number;
+    rating_count: number;
+    avatar_url?: string;
+    is_verified: boolean;
+  };
+  mission_categories: {
+    name: string;
+    icon: string;
+  };
+}
 
 const StatusBadge = ({ status }: { status: string }) => {
   const statusConfig = {
@@ -53,53 +79,130 @@ const MissionDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [userRole] = useState<"runner" | "owner">("runner"); // Mock user role
-  
-  // Mock mission data
-  const mission = {
-    id: parseInt(id || "1"),
-    title: "Consegna pacchi centro città",
-    description: "Ritiro e consegna di 3 pacchi in zona centro città. I pacchi sono di dimensioni medie e non superano i 5kg ciascuno. Ritiro presso il nostro ufficio in Via Roma 15 e consegna presso 3 indirizzi diversi nel centro storico. Auto necessaria per gli spostamenti. Preferibile esperienza in consegne.",
-    category: "Consegne",
-    location: "Centro città - Via Roma 15",
-    duration: "2-3 ore",
-    price: 25,
-    status: "open",
-    owner: {
-      name: "Marco Rossi",
-      rating: 4.8,
-      reviewCount: 34,
-      avatar: "MR",
-      verified: true
-    },
-    timeline: [
-      { label: "Aperta", completed: true },
-      { label: "In corso", completed: false, current: false },
-      { label: "In attesa conferma", completed: false },
-      { label: "Completata", completed: false }
-    ],
-    requirements: [
-      "Auto propria necessaria",
-      "Disponibilità mattutina (9-12)",
-      "Esperienza in consegne preferibile"
-    ],
-    compensation: {
-      base: 25,
-      bonus: 5,
-      total: 30
+  const { user } = useAuth();
+  const [mission, setMission] = useState<Mission | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<"runner" | "owner" | "guest">("guest");
+
+  useEffect(() => {
+    if (!id) {
+      navigate('/missions');
+      return;
+    }
+    
+    fetchMissionDetails();
+  }, [id, navigate]);
+
+  const fetchMissionDetails = async () => {
+    try {
+      const { data: missionData, error } = await supabase
+        .from('missions')
+        .select(`
+          id,
+          title,
+          description,
+          price,
+          location,
+          duration_hours,
+          status,
+          created_at,
+          owner_id,
+          runner_id,
+          profiles!missions_owner_id_fkey(
+            first_name,
+            last_name,
+            rating_average,
+            rating_count,
+            avatar_url,
+            is_verified
+          ),
+          mission_categories(
+            name,
+            icon
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching mission:', error);
+        toast({
+          title: "Errore",
+          description: "Impossibile caricare i dettagli della missione",
+          variant: "destructive",
+        });
+        navigate('/missions');
+        return;
+      }
+
+      if (missionData) {
+        setMission(missionData as Mission);
+        
+        // Determine user role
+        if (!user) {
+          setUserRole("guest");
+        } else if (missionData.owner_id === user.id) {
+          setUserRole("owner");
+        } else {
+          setUserRole("runner");
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching mission details:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante il caricamento",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAcceptMission = () => {
-    toast({
-      title: "Missione accettata!",
-      description: "Ti metteremo in contatto con il proprietario",
-    });
-    navigate(`/chat/${mission.owner.name.toLowerCase().replace(" ", "-")}`);
+  const handleAcceptMission = async () => {
+    if (!user || !mission) return;
+    
+    try {
+      const { error } = await supabase
+        .from('missions')
+        .update({ 
+          runner_id: user.id,
+          status: 'in_progress' 
+        })
+        .eq('id', mission.id);
+
+      if (error) {
+        toast({
+          title: "Errore",
+          description: "Impossibile accettare la missione",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Missione accettata!",
+        description: "Ti metteremo in contatto con il proprietario",
+      });
+      
+      // Refresh mission data
+      await fetchMissionDetails();
+      
+      // Navigate to chat
+      navigate(`/chat/${mission.id}`);
+    } catch (error) {
+      console.error('Error accepting mission:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleContactOwner = () => {
-    navigate(`/chat/${mission.owner.name.toLowerCase().replace(" ", "-")}`);
+    if (!mission) return;
+    navigate(`/chat/${mission.id}`);
   };
 
   const handleReportMission = () => {
@@ -109,6 +212,79 @@ const MissionDetails = () => {
       variant: "destructive",
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-6">
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
+          <div className="px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                onClick={() => navigate("/missions")}
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <Skeleton className="h-6 w-32" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="px-6 py-6 space-y-6">
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!mission) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="p-8 text-center max-w-md">
+          <Briefcase className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">
+            Missione non trovata
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            La missione che stai cercando potrebbe essere stata rimossa o non esistere.
+          </p>
+          <Button onClick={() => navigate('/missions')}>
+            Torna alle missioni
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  const getStatusConfig = (status: string) => {
+    const configs = {
+      open: { label: "Aperta", className: "status-open" },
+      in_progress: { label: "In corso", className: "status-progress" },
+      pending_completion: { label: "In attesa", className: "status-badge bg-warning/10 text-warning border-warning/20" },
+      completed: { label: "Completata", className: "status-completed" },
+      cancelled: { label: "Annullata", className: "status-badge bg-destructive/10 text-destructive border-destructive/20" }
+    };
+    return configs[status as keyof typeof configs] || configs.open;
+  };
+
+  const getTimelineSteps = (status: string) => {
+    return [
+      { label: "Aperta", completed: true },
+      { label: "In corso", completed: ['in_progress', 'pending_completion', 'completed'].includes(status), current: status === 'in_progress' },
+      { label: "In attesa conferma", completed: ['pending_completion', 'completed'].includes(status), current: status === 'pending_completion' },
+      { label: "Completata", completed: status === 'completed', current: false }
+    ];
+  };
+
+  const ownerName = `${mission.profiles.first_name} ${mission.profiles.last_name}`;
+  const ownerInitials = `${mission.profiles.first_name?.[0] || ''}${mission.profiles.last_name?.[0] || ''}`;
+  const statusConfig = getStatusConfig(mission.status);
+  const timelineSteps = getTimelineSteps(mission.status);
 
   return (
     <div className="min-h-screen bg-background pb-6">
@@ -134,21 +310,23 @@ const MissionDetails = () => {
         <Card className="p-6 bg-gradient-card border-0 shadow-card">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Truck className="w-6 h-6 text-primary" />
+              <span className="text-2xl">{mission.mission_categories?.icon || '⭐'}</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <h1 className="text-xl font-bold text-foreground">{mission.title}</h1>
-                <StatusBadge status={mission.status} />
+                <Badge className={`status-badge ${statusConfig.className}`}>
+                  {statusConfig.label}
+                </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{mission.category}</p>
+              <p className="text-sm text-muted-foreground">{mission.mission_categories?.name}</p>
             </div>
           </div>
           
           <div className="text-center py-4 border-t border-border/50">
-            <span className="text-3xl font-bold text-foreground">€{mission.compensation.total}</span>
+            <span className="text-3xl font-bold text-foreground">€{mission.price}</span>
             <p className="text-sm text-muted-foreground">
-              Base €{mission.compensation.base} + Bonus €{mission.compensation.bonus}
+              {mission.duration_hours ? `~${mission.duration_hours}h di lavoro` : 'Durata da concordare'}
             </p>
           </div>
         </Card>
@@ -158,14 +336,15 @@ const MissionDetails = () => {
           <h3 className="font-semibold text-foreground mb-3">Proprietario</h3>
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12">
+              <AvatarImage src={mission.profiles.avatar_url || undefined} />
               <AvatarFallback className="bg-secondary text-secondary-foreground font-semibold">
-                {mission.owner.avatar}
+                {ownerInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h4 className="font-medium text-foreground">{mission.owner.name}</h4>
-                {mission.owner.verified && (
+                <h4 className="font-medium text-foreground">{ownerName}</h4>
+                {mission.profiles.is_verified && (
                   <Badge className="status-badge bg-success/10 text-success border-success/20 text-xs">
                     Verificato
                   </Badge>
@@ -173,13 +352,16 @@ const MissionDetails = () => {
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Star className="w-4 h-4 fill-current text-primary" />
-                <span>{mission.owner.rating} ({mission.owner.reviewCount} recensioni)</span>
+                <span>
+                  {mission.profiles.rating_average?.toFixed(1) || '5.0'} 
+                  ({mission.profiles.rating_count || 0} recensioni)
+                </span>
               </div>
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/profile/${mission.owner.name.toLowerCase().replace(" ", "-")}`)}
+              onClick={() => navigate(`/profile/${mission.profiles.first_name?.toLowerCase()}-${mission.profiles.last_name?.toLowerCase()}`)}
             >
               <User className="w-4 h-4 mr-2" />
               Profilo
@@ -208,7 +390,9 @@ const MissionDetails = () => {
               <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">Durata stimata</p>
-                <p className="text-sm text-muted-foreground">{mission.duration}</p>
+                <p className="text-sm text-muted-foreground">
+                  {mission.duration_hours ? `${mission.duration_hours} ore` : 'Da concordare'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -216,31 +400,18 @@ const MissionDetails = () => {
               <div>
                 <p className="text-sm font-medium text-foreground">Compenso</p>
                 <p className="text-sm text-muted-foreground">
-                  €{mission.compensation.base} base + €{mission.compensation.bonus} bonus performance
+                  €{mission.price} totale
                 </p>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Requirements */}
-        <Card className="p-4 bg-card shadow-card border-0">
-          <h3 className="font-semibold text-foreground mb-3">Requisiti</h3>
-          <ul className="space-y-2">
-            {mission.requirements.map((req, index) => (
-              <li key={index} className="flex items-start gap-2 text-sm">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                <span className="text-foreground">{req}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
         {/* Timeline */}
         <Card className="p-4 bg-card shadow-card border-0">
           <h3 className="font-semibold text-foreground mb-3">Timeline missione</h3>
           <div className="space-y-3">
-            {mission.timeline.map((step, index) => (
+            {timelineSteps.map((step, index) => (
               <TimelineStep key={index} {...step} />
             ))}
           </div>
@@ -248,7 +419,19 @@ const MissionDetails = () => {
 
         {/* Actions */}
         <div className="space-y-3">
-          {userRole === "runner" && mission.status === "open" ? (
+          {userRole === "guest" ? (
+            <Card className="p-4 bg-primary/5 border-primary/20 text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                Accedi per interagire con questa missione
+              </p>
+              <Button
+                onClick={() => navigate('/')}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Accedi o Registrati
+              </Button>
+            </Card>
+          ) : userRole === "runner" && mission.status === "open" ? (
             <>
               <Button
                 onClick={handleAcceptMission}
@@ -275,6 +458,25 @@ const MissionDetails = () => {
                 </Button>
               </div>
             </>
+          ) : userRole === "owner" ? (
+            <div className="grid grid-cols-1 gap-3">
+              <Button
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-11"
+                onClick={() => navigate(`/missions/${mission.id}/manage`)}
+              >
+                Gestisci missione
+              </Button>
+              {mission.status !== 'open' && (
+                <Button
+                  variant="outline"
+                  onClick={handleContactOwner}
+                  className="h-11"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Chat con Runner
+                </Button>
+              )}
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -286,9 +488,12 @@ const MissionDetails = () => {
                 Chat
               </Button>
               <Button
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-11"
+                variant="outline"
+                onClick={handleReportMission}
+                className="h-11 text-destructive border-destructive/20 hover:bg-destructive/5"
               >
-                Gestisci missione
+                <Flag className="w-4 h-4 mr-2" />
+                Segnala
               </Button>
             </div>
           )}

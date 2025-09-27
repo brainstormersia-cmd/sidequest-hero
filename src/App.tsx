@@ -4,8 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import BottomNavigation from "./components/ui/bottom-navigation";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
+import { AuthProvider } from "./contexts/AuthContext";
+import Landing from "./pages/Landing";
+import OnboardingWrapper from "./pages/OnboardingWrapper";
+import CommunityDashboard from "./pages/CommunityDashboard";
 import Missions from "./pages/Missions";
 import MissionDetails from "./pages/MissionDetails";
 import Chat from "./pages/Chat";
@@ -19,13 +21,14 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const hideBottomNav = location.pathname === "/" || location.pathname.startsWith("/chat");
+  const hideBottomNav = location.pathname === "/" || location.pathname === "/onboarding" || location.pathname.startsWith("/chat");
   
   return (
     <>
       <Routes>
-        <Route path="/" element={<Onboarding />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/onboarding" element={<OnboardingWrapper />} />
+        <Route path="/dashboard" element={<CommunityDashboard />} />
         <Route path="/missions" element={<Missions />} />
         <Route path="/missions/:id" element={<MissionDetails />} />
         <Route path="/chat" element={<Chat />} />
@@ -43,13 +46,15 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
