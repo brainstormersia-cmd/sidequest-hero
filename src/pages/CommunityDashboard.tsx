@@ -23,6 +23,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { LiveActivityFeed } from "@/components/LiveActivityFeed";
 
 interface Mission {
   id: string;
@@ -378,10 +380,22 @@ const CommunityDashboard = () => {
             </div>
             <div className="flex items-center gap-3">
               {!isGuest && profile && (
-                <div className="wallet-pill">
-                  <Wallet className="w-4 h-4 inline mr-2" />
-                  €{profile.total_earnings?.toFixed(2) || '0.00'}
-                </div>
+                <Card className="bg-primary text-primary-foreground px-4 py-2 rounded-2xl shadow-floating border-0">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="text-xs opacity-80 font-medium">Saldo</p>
+                      <p className="text-lg font-black leading-none">
+                        <AnimatedCounter 
+                          value={profile.total_earnings || 0} 
+                          prefix="€"
+                          decimals={2}
+                          duration={800}
+                        />
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               )}
               <Button
                 variant="ghost"
@@ -415,6 +429,18 @@ const CommunityDashboard = () => {
           </div>
         </section>
 
+        {/* Live Activity Feed */}
+        <section>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
+            </span>
+            Cosa sta succedendo ORA
+          </h2>
+          <LiveActivityFeed />
+        </section>
+
         {/* Community Stats */}
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -422,24 +448,53 @@ const CommunityDashboard = () => {
             La Community Oggi
           </h2>
           <div className="grid grid-cols-3 gap-4">
-            <StatCard
-              title="Guadagnato oggi"
-              value={`€${(communityStats.totalEarnings * 0.1).toFixed(0)}K`}
-              icon={<TrendingUp className="w-4 h-4" />}
-              trend="+12%"
-            />
-            <StatCard
-              title="Missioni attive"
-              value={communityStats.activeMissions}
-              icon={<Briefcase className="w-4 h-4" />}
-              trend={`+${Math.floor(communityStats.activeMissions * 0.2)}`}
-            />
-            <StatCard
-              title="Sidequester"
-              value={communityStats.totalUsers}
-              icon={<Users className="w-4 h-4" />}
-              trend="+47"
-            />
+            <Card className="p-4 bg-gradient-card border-0 shadow-card hover:shadow-floating transition-smooth">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-primary"><TrendingUp className="w-4 h-4" /></div>
+                <Badge variant="secondary" className="text-xs bg-success/10 text-success border-success/20">+12%</Badge>
+              </div>
+              <h3 className="text-3xl font-black text-foreground">
+                <AnimatedCounter 
+                  value={communityStats.totalEarnings * 0.1} 
+                  prefix="€"
+                  suffix="K"
+                  decimals={1}
+                  duration={1200}
+                />
+              </h3>
+              <p className="text-sm font-medium text-foreground">Guadagnato oggi</p>
+              <p className="text-xs text-muted-foreground mt-1">🔥 In crescita</p>
+            </Card>
+            <Card className="p-4 bg-gradient-card border-0 shadow-card hover:shadow-floating transition-smooth">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-primary"><Briefcase className="w-4 h-4" /></div>
+                <Badge variant="secondary" className="text-xs">+{Math.floor(communityStats.activeMissions * 0.2)}</Badge>
+              </div>
+              <h3 className="text-3xl font-black text-foreground">
+                <AnimatedCounter 
+                  value={communityStats.activeMissions} 
+                  decimals={0}
+                  duration={1000}
+                />
+              </h3>
+              <p className="text-sm font-medium text-foreground">Missioni attive ORA</p>
+              <p className="text-xs text-muted-foreground mt-1">👀 Disponibili</p>
+            </Card>
+            <Card className="p-4 bg-gradient-card border-0 shadow-card hover:shadow-floating transition-smooth">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-primary"><Users className="w-4 h-4" /></div>
+                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">+47</Badge>
+              </div>
+              <h3 className="text-3xl font-black text-foreground">
+                <AnimatedCounter 
+                  value={communityStats.totalUsers} 
+                  decimals={0}
+                  duration={1000}
+                />
+              </h3>
+              <p className="text-sm font-medium text-foreground">Sidequester online</p>
+              <p className="text-xs text-muted-foreground mt-1">💪 Community attiva</p>
+            </Card>
           </div>
         </section>
 

@@ -16,14 +16,16 @@ const FeatureCard = ({
   title: string; 
   description: string; 
 }) => (
-  <Card className="bg-secondary text-secondary-foreground p-6 rounded-3xl border-0 shadow-floating hover:scale-[1.02] transition-bounce">
-    <div className="flex items-center gap-4 mb-3">
-      <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
+  <Card className="bg-card border-4 border-primary/20 hover:border-primary p-5 rounded-3xl shadow-[4px_4px_0px_0px_rgba(255,214,10,0.2)] hover:shadow-[8px_8px_0px_0px_rgba(255,214,10,0.3)] hover:-translate-y-1 hover:rotate-1 transition-all duration-300">
+    <div className="flex items-center gap-4">
+      <div className="flex-shrink-0">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold">{title}</h3>
+      <div className="flex-1">
+        <h3 className="text-lg font-black text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground leading-snug">{description}</p>
+      </div>
     </div>
-    <p className="text-secondary-foreground/80 leading-relaxed">{description}</p>
   </Card>
 );
 
@@ -46,92 +48,121 @@ const Landing = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Floating shapes background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl animate-float animation-delay-200"></div>
+        <div className="absolute bottom-40 left-1/4 w-36 h-36 bg-primary/10 rounded-full blur-3xl animate-float animation-delay-400"></div>
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-primary/5 rounded-full blur-3xl animate-float animation-delay-600"></div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         {/* Logo */}
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-6 animate-fade-in">
           <img 
             src={sidequestLogo} 
             alt="SideQuest" 
-            className="w-24 h-24 rounded-3xl shadow-floating hover:scale-105 transition-bounce" 
+            className="w-32 h-32 rounded-3xl shadow-floating hover:scale-105 transition-bounce border-4 border-primary/20" 
           />
         </div>
 
         {/* Hero Title */}
-        <div className="text-center mb-8 animate-fade-in animation-delay-200">
-          <h1 className="text-5xl font-bold text-white mb-4 text-balance">
-            Benvenuto in<br />
-            <span className="text-primary">SideQuest</span>
+        <div className="text-center mb-6 animate-fade-in animation-delay-200">
+          <h1 className="text-6xl font-bold text-foreground mb-3 text-balance">
+            Benvenuto in
           </h1>
-          <p className="text-white/90 text-xl text-balance max-w-md mx-auto leading-relaxed">
-            La community che connette persone, crea opportunità e trasforma il tempo in valore
+          <h1 className="text-6xl font-black text-primary mb-4 text-balance tracking-tight">
+            SideQuest
+          </h1>
+          <p className="text-foreground/80 text-lg text-balance max-w-md mx-auto leading-relaxed font-medium">
+            Fai quello che ti piace. Guadagna. Aiuta la tua città. 🚀
           </p>
         </div>
 
+        {/* Live Community Stats Ticker */}
+        <div className="mb-8 animate-fade-in animation-delay-400">
+          <Card className="bg-card/80 backdrop-blur-sm border-2 border-primary/20 p-4 rounded-2xl shadow-floating">
+            <div className="flex items-center gap-3 text-center">
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </div>
+              <div>
+                <p className="text-3xl font-black text-primary">€12.5K</p>
+                <p className="text-xs text-muted-foreground font-medium">guadagnati oggi dalla community</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
         {/* Action Buttons */}
-        <div className="w-full max-w-sm space-y-4 mb-12 animate-fade-in animation-delay-400">
+        <div className="w-full max-w-sm space-y-3 mb-10 animate-fade-in animation-delay-600">
           <Button 
             onClick={() => setActiveFlow('register')}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-14 text-lg font-semibold rounded-2xl shadow-floating transition-bounce hover:scale-[1.02] active:scale-95"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-16 text-xl font-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(255,214,10,0.3)] hover:shadow-[12px_12px_0px_0px_rgba(255,214,10,0.4)] transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] active:translate-x-0 active:translate-y-0 active:shadow-[4px_4px_0px_0px_rgba(255,214,10,0.3)]"
           >
-            Registrati
+            🚀 Inizia la tua avventura
             <ArrowRight className="w-6 h-6 ml-2" />
           </Button>
           
           <Button 
             onClick={() => setActiveFlow('login')}
             variant="outline"
-            className="w-full border-2 border-white/20 bg-white/10 text-white hover:bg-white/20 h-14 text-lg font-semibold rounded-2xl backdrop-blur-sm transition-bounce hover:scale-[1.02] active:scale-95"
+            className="w-full border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background h-14 text-lg font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
           >
-            Accedi
+            Bentornato, Sidequester! 👋
           </Button>
           
           <Button 
             onClick={() => setActiveFlow('explore')}
             variant="ghost"
-            className="w-full text-white/80 hover:text-white hover:bg-white/10 h-12 text-base font-medium rounded-xl transition-smooth"
+            className="w-full text-muted-foreground hover:text-foreground hover:bg-muted/50 h-12 text-base font-medium rounded-xl transition-smooth"
           >
             <Eye className="w-5 h-5 mr-2" />
-            Sto solo dando un'occhiata
+            Prima dai un'occhiata 👀
           </Button>
         </div>
 
         {/* Feature Cards */}
-        <div className="w-full max-w-md space-y-4 animate-fade-in animation-delay-600">
+        <div className="w-full max-w-md space-y-3 animate-fade-in animation-delay-800">
           <FeatureCard
-            icon={<Search className="w-6 h-6 text-primary-foreground" />}
-            title="Trova missioni"
-            description="Scopri opportunità uniche nella tua città e trasforma il tuo tempo libero in guadagno"
+            icon={<Search className="w-8 h-8 text-primary" />}
+            title="🎯 Trova quest"
+            description="€15-50/ora in media · Opportunità vicino a te"
           />
           
           <FeatureCard
-            icon={<DollarSign className="w-6 h-6 text-primary-foreground" />}
-            title="Guadagna in sicurezza"
-            description="Sistema escrow sicuro, pagamenti garantiti e rating verificati per ogni transazione"
+            icon={<DollarSign className="w-8 h-8 text-success" />}
+            title="💰 Guadagna subito"
+            description="Pagamenti sicuri · Saldo disponibile in 24h"
           />
           
           <FeatureCard
-            icon={<Briefcase className="w-6 h-6 text-primary-foreground" />}
-            title="Crea e gestisci"
-            description="Pubblica le tue richieste, trova aiuto qualificato e costruisci la tua reputazione"
+            icon={<Briefcase className="w-8 h-8 text-secondary" />}
+            title="🚀 Costruisci la tua rep"
+            description="Rating verificati · Community di fiducia"
           />
         </div>
 
         {/* Community Stats */}
-        <div className="w-full max-w-md mt-8 animate-fade-in animation-delay-800">
-          <Card className="bg-white/10 backdrop-blur-sm border-0 p-6 rounded-2xl">
-            <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="w-full max-w-md mt-8 animate-fade-in animation-delay-1000">
+          <Card className="bg-card/50 backdrop-blur-sm border-2 border-primary/10 p-6 rounded-3xl">
+            <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <div className="text-2xl font-bold text-white">2.8K+</div>
-                <div className="text-white/80 text-sm">Sidequester</div>
+                <div className="text-3xl font-black text-foreground mb-1">👥</div>
+                <div className="text-2xl font-bold text-primary">2.8K+</div>
+                <div className="text-muted-foreground text-xs font-medium">Sidequester attivi</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">15K+</div>
-                <div className="text-white/80 text-sm">Missioni</div>
+                <div className="text-3xl font-black text-foreground mb-1">⚡</div>
+                <div className="text-2xl font-bold text-success">15K+</div>
+                <div className="text-muted-foreground text-xs font-medium">Quest completate</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">4.9</div>
-                <div className="text-white/80 text-sm">Rating</div>
+                <div className="text-3xl font-black text-foreground mb-1">⭐</div>
+                <div className="text-2xl font-bold text-warning">4.9/5</div>
+                <div className="text-muted-foreground text-xs font-medium">Rating medio</div>
               </div>
             </div>
           </Card>

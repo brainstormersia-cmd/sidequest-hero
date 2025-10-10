@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AnimatedCounter } from "@/components/AnimatedCounter";
 
 const TransactionItem = ({ 
   title, 
@@ -149,22 +150,38 @@ const Wallet = () => {
 
       <div className="px-6 py-6 space-y-6">
         {/* Balance Card */}
-        <Card className="p-6 bg-gradient-hero border-0 shadow-floating text-secondary-foreground">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <WalletIcon className="w-6 h-6" />
-              <span className="text-sm font-medium opacity-90">Saldo disponibile</span>
+        <Card className="p-8 bg-gradient-hero border-0 shadow-floating text-secondary-foreground relative overflow-hidden">
+          <div className="absolute inset-0 bg-primary/5 animate-pulse"></div>
+          <div className="text-center relative z-10">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <WalletIcon className="w-7 h-7" />
+              <span className="text-base font-bold opacity-90">Saldo disponibile</span>
             </div>
-            <h2 className="text-4xl font-bold mb-4">€{balance.toFixed(2)}</h2>
+            <div className="text-5xl font-black mb-6 animate-celebration">
+              <AnimatedCounter 
+                value={balance} 
+                prefix="€"
+                decimals={2}
+                duration={1200}
+                celebration={balance > 100}
+              />
+            </div>
             
             {pendingBalance > 0 && (
-              <div className="bg-secondary-foreground/10 rounded-xl p-3 mb-4">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Clock className="w-4 h-4 text-warning" />
-                  <span className="text-sm font-medium">In sospeso</span>
+              <div className="bg-secondary-foreground/10 backdrop-blur-sm rounded-2xl p-4 mb-4 border-2 border-secondary-foreground/20">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Clock className="w-5 h-5 text-warning" />
+                  <span className="text-base font-bold">In sospeso</span>
                 </div>
-                <p className="text-lg font-semibold">€{pendingBalance.toFixed(2)}</p>
-                <p className="text-xs opacity-75">In attesa di conferma completamento</p>
+                <p className="text-2xl font-black">
+                  <AnimatedCounter 
+                    value={pendingBalance} 
+                    prefix="€"
+                    decimals={2}
+                    duration={1000}
+                  />
+                </p>
+                <p className="text-xs opacity-90 font-medium mt-1">Disponibile tra 2 giorni 🎉</p>
               </div>
             )}
             
