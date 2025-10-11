@@ -5,8 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Edit, Star, MapPin, Calendar, Briefcase, CheckCircle, LogOut } from "lucide-react";
+import { ArrowLeft, Edit, Star, MapPin, Calendar, Briefcase, CheckCircle, LogOut, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LevelBadge } from "@/components/LevelBadge";
+import { AchievementCard } from "@/components/AchievementCard";
+import { getUserLevel, checkAchievements } from "@/lib/gamification";
 
 const ReviewCard = ({ 
   reviewer, 
@@ -181,6 +184,13 @@ const Profile = () => {
     }
   ];
 
+  const userLevel = getUserLevel(user.stats.missionsCompleted);
+  const achievements = checkAchievements({
+    missions_completed: user.stats.missionsCompleted,
+    total_earnings: user.stats.totalEarnings,
+    rating_average: user.rating
+  });
+
   const handleLogout = () => {
     toast({
       title: "Logout effettuato",
@@ -235,6 +245,17 @@ const Profile = () => {
               )}
             </div>
             
+            {/* Level Badge */}
+            <div className="flex justify-center mb-3">
+              <LevelBadge
+                currentLevel={userLevel.name}
+                nextLevel={getUserLevel(user.stats.missionsCompleted + 1).name !== userLevel.name ? getUserLevel(user.stats.missionsCompleted + 1).name : 'Livello Massimo'}
+                progress={((user.stats.missionsCompleted % 30) / 30) * 100}
+                perks={userLevel.perks}
+                compact
+              />
+            </div>
+            
             <div className="flex items-center justify-center gap-1 mb-3">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
@@ -286,8 +307,9 @@ const Profile = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="reviews" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-muted/50 rounded-xl">
+          <TabsList className="grid w-full grid-cols-4 bg-muted/50 rounded-xl">
             <TabsTrigger value="reviews" className="rounded-lg text-xs">⭐ Recensioni</TabsTrigger>
+            <TabsTrigger value="achievements" className="rounded-lg text-xs">🏆 Obiettivi</TabsTrigger>
             <TabsTrigger value="created" className="rounded-lg text-xs">📝 Create</TabsTrigger>
             <TabsTrigger value="completed" className="rounded-lg text-xs">✅ Completate</TabsTrigger>
           </TabsList>
@@ -296,6 +318,14 @@ const Profile = () => {
             {reviews.map((review, index) => (
               <ReviewCard key={index} {...review} />
             ))}
+          </TabsContent>
+          
+          <TabsContent value="achievements" className="mt-6">
+            <div className="grid grid-cols-2 gap-3">
+              {achievements.map(achievement => (
+                <AchievementCard key={achievement.id} {...achievement} />
+              ))}
+            </div>
           </TabsContent>
           
           <TabsContent value="created" className="mt-6 space-y-4">

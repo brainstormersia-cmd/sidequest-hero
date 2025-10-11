@@ -6,9 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle, TrendingUp, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { EarningsChart } from "@/components/EarningsChart";
+import { CategoryBreakdown } from "@/components/CategoryBreakdown";
+import { MilestoneProgress } from "@/components/MilestoneProgress";
+import { mockEarningsHistory, mockCategoryStats } from "@/lib/mockData";
 
 const TransactionItem = ({ 
   title, 
@@ -234,9 +238,10 @@ const Wallet = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="balance" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/50 rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 rounded-xl">
             <TabsTrigger value="balance" className="rounded-lg">💰 Saldo</TabsTrigger>
             <TabsTrigger value="history" className="rounded-lg">📜 Cronologia</TabsTrigger>
+            <TabsTrigger value="insights" className="rounded-lg">📊 Insights</TabsTrigger>
           </TabsList>
           
           <TabsContent value="balance" className="mt-6 space-y-4">
@@ -279,6 +284,67 @@ const Wallet = () => {
                   <TransactionItem key={index} {...transaction} />
                 ))}
               </div>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="insights" className="mt-6 space-y-6">
+            {/* Earnings Trend Chart */}
+            <Card className="p-4 bg-card shadow-card border-0">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Trend Guadagni (ultimi 30 giorni)
+              </h3>
+              <EarningsChart 
+                data={mockEarningsHistory}
+                variant="full"
+                showGrid
+              />
+            </Card>
+
+            {/* Category Breakdown */}
+            <Card className="p-4 bg-card shadow-card border-0">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Guadagni per Categoria
+              </h3>
+              <CategoryBreakdown categories={mockCategoryStats} />
+            </Card>
+
+            {/* Fun Stats */}
+            <Card className="p-4 bg-card shadow-card border-0">
+              <h3 className="font-semibold text-foreground mb-4">🎉 I Tuoi Record</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm text-muted-foreground">Guadagno medio per ora</span>
+                  <span className="font-semibold text-foreground text-lg">€18.50</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm text-muted-foreground">Giorno migliore</span>
+                  <span className="font-semibold text-foreground text-lg">Martedì (€65)</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm text-muted-foreground">Categoria top</span>
+                  <span className="font-semibold text-foreground text-lg">🐕 Dog sitting</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="text-sm font-medium text-foreground">Ranking Community</span>
+                  <span className="font-bold text-primary text-lg">Top 15% 🏆</span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Next Milestone */}
+            <Card className="p-4 bg-gradient-to-br from-primary/5 to-warning/5 border-primary/20 shadow-card">
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Prossimo Obiettivo
+              </h3>
+              <MilestoneProgress
+                current={balance + pendingBalance}
+                next={500}
+                label="€500 - Livello Gold Sidequester"
+                showPercentage
+              />
             </Card>
           </TabsContent>
         </Tabs>

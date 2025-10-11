@@ -25,6 +25,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { LiveActivityFeed } from "@/components/LiveActivityFeed";
+import { PersonalEarningsWidget } from "@/components/PersonalEarningsWidget";
+import { LevelBadge } from "@/components/LevelBadge";
+import { getUserLevel } from "@/lib/gamification";
 
 interface Mission {
   id: string;
@@ -497,6 +500,39 @@ const CommunityDashboard = () => {
             </Card>
           </div>
         </section>
+
+        {/* Personal Earnings Widget (for logged in users) */}
+        {!isGuest && profile && (
+          <section>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-primary" />
+              Il Tuo Riepilogo
+            </h2>
+            <PersonalEarningsWidget
+              totalEarnings={profile.total_earnings || 0}
+              weeklyEarnings={125}
+              weeklyChange={45}
+              missionCount={profile.missions_completed || 0}
+              nextMilestone={{ value: 500, label: 'Livello Gold' }}
+            />
+          </section>
+        )}
+
+        {/* Gamification Section (for logged in users) */}
+        {!isGuest && profile && (
+          <section>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Il Tuo Livello
+            </h2>
+            <LevelBadge
+              currentLevel={getUserLevel(profile.missions_completed || 0).name}
+              nextLevel={getUserLevel((profile.missions_completed || 0) + 1).name !== getUserLevel(profile.missions_completed || 0).name ? getUserLevel((profile.missions_completed || 0) + 1).name : 'Livello Massimo'}
+              progress={((profile.missions_completed || 0) % 30 / 30) * 100}
+              perks={getUserLevel(profile.missions_completed || 0).perks}
+            />
+          </section>
+        )}
 
         {/* SideQuest Heroes */}
         {topUsers.length > 0 && (
