@@ -123,13 +123,13 @@ export const LiveActivityFeed = () => {
       }, (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
         const generatedId =
           globalThis.crypto?.randomUUID?.() ?? `activity-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        const rec = payload.new as Record<string, unknown>;
+        const record = payload.new as Record<string, any>;
         const newActivity: ActivityEvent = {
-          id: String(rec?.id ?? generatedId),
+          id: String(record?.id ?? generatedId),
           type: 'mission_created',
-          title: `Nuova missione: ${String(rec?.title ?? 'Missione SideQuest')}`,
-          description: `€${rec?.price ?? '—'} disponibili`,
-          amount: typeof rec?.price === 'number' ? rec.price : undefined,
+          title: `Nuova missione: ${String(record?.title ?? 'Missione SideQuest')}`,
+          description: `€${record?.price ?? '—'} disponibili`,
+          amount: typeof record?.price === 'number' ? record.price : undefined,
           timestamp: 'Proprio ora',
           user: {
             name: 'Nuovo utente'

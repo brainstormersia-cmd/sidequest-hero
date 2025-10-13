@@ -16,14 +16,6 @@ interface Mission {
   description: string;
   price: number;
   location: string;
-  street?: string;
-  street_number?: string;
-  city?: string;
-  province?: string;
-  postal_code?: string;
-  country?: string;
-  lat?: number;
-  lon?: number;
   duration_hours: number;
   status: 'open' | 'in_progress' | 'pending_completion' | 'completed' | 'cancelled';
   created_at: string;
@@ -93,6 +85,16 @@ const MissionDetails = () => {
   const [userRole, setUserRole] = useState<"runner" | "owner" | "guest">("guest");
 
   const fetchMissionDetails = useCallback(async () => {
+    if (!id || id.startsWith('fallback')) {
+      toast({ 
+        title: "Missione non disponibile", 
+        description: "Questa missione non esiste o è stata rimossa",
+        variant: "destructive" 
+      });
+      navigate('/missions');
+      return;
+    }
+
     try {
       const { data: missionData, error } = await supabase
         .from('missions')
@@ -102,14 +104,6 @@ const MissionDetails = () => {
           description,
           price,
           location,
-          street,
-          street_number,
-          city,
-          province,
-          postal_code,
-          country,
-          lat,
-          lon,
           duration_hours,
           status,
           created_at,
@@ -399,18 +393,7 @@ const MissionDetails = () => {
               <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">Ubicazione</p>
-                {mission.street ? (
-                  <>
-                    <p className="text-sm text-foreground">
-                      {mission.street} {mission.street_number}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {mission.postal_code} {mission.city} {mission.province && `(${mission.province})`}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">{mission.location}</p>
-                )}
+                <p className="text-sm text-muted-foreground">{mission.location}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

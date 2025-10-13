@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,29 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, Clock, Euro, Eye, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMapboxAutocomplete, type MapboxSuggestion } from "@/hooks/use-mapbox-autocomplete";
 
 interface DraftMission {
   title: string;
   description: string;
   category: string;
   duration: string;
-  address: {
-    label: string;
-    street: string;
-    number: string;
-    city: string;
-    province: string;
-    postal_code: string;
-    country: string;
-    lat: number | null;
-    lon: number | null;
-  } | null;
+  location: string;
   price: string;
 }
 
@@ -66,7 +55,7 @@ const PreviewCard = ({ mission }: { mission: DraftMission }) => (
     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
       <div className="flex items-center gap-1">
         <MapPin className="w-3 h-3" />
-        <span>{mission.address?.label || 'Da definire'}</span>
+        <span>{mission.location}</span>
       </div>
       <div className="flex items-center gap-1">
         <Clock className="w-3 h-3" />
@@ -101,39 +90,9 @@ const CreateMission = () => {
     description: "",
     category: "",
     duration: "",
-    address: null,
+    location: "",
     price: ""
   });
-  const [locationQuery, setLocationQuery] = useState("");
-  const [isLocationFocused, setIsLocationFocused] = useState(false);
-  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const trimmedLocationQuery = locationQuery.trim();
-  const { suggestions, isLoading: isLoadingSuggestions, error: locationError } = useMapboxAutocomplete(
-    trimmedLocationQuery,
-    {
-      enabled: currentStep === 3 && trimmedLocationQuery.length >= 3,
-    }
-  );
-
-  const handleSelectLocation = (suggestion: MapboxSuggestion) => {
-    setMission((prev) => ({
-      ...prev,
-      address: {
-        label: suggestion.placeName,
-        street: suggestion.primaryText || "",
-        number: "",
-        city: "",
-        province: "",
-        postal_code: "",
-        country: "Italia",
-        lat: Number.isFinite(suggestion.latitude) ? suggestion.latitude : null,
-        lon: Number.isFinite(suggestion.longitude) ? suggestion.longitude : null,
-      }
-    }));
-    setLocationQuery(suggestion.placeName);
-    setIsLocationFocused(false);
-  };
 
   // Fetch categories from database
   const { data: categories } = useQuery({
@@ -182,7 +141,7 @@ const CreateMission = () => {
     }
 
     if (!mission.title || !mission.description || !mission.category || 
-        !mission.duration || !mission.address || !mission.price) {
+        !mission.duration || !mission.location || !mission.price) {
       toast({
         title: "Campi mancanti",
         description: "Completa tutti i campi obbligatori",
@@ -216,18 +175,7 @@ const CreateMission = () => {
           title: mission.title,
           description: mission.description,
           category_id: categoryId,
-          
-          // Address fields (backward compatible)
-          location: mission.address?.label || "",
-          street: mission.address?.street || null,
-          street_number: mission.address?.number || null,
-          city: mission.address?.city || null,
-          province: mission.address?.province || null,
-          postal_code: mission.address?.postal_code || null,
-          country: mission.address?.country || "Italia",
-          lat: mission.address?.lat || null,
-          lon: mission.address?.lon || null,
-          
+          location: mission.location,
           price: parseFloat(mission.price),
           duration_hours: durationHours,
           status: 'open'
@@ -264,7 +212,7 @@ const CreateMission = () => {
       case 2:
         return mission.category && mission.duration;
       case 3:
-        return mission.address !== null && mission.address.street !== "";
+        return mission.location;
       case 4:
         return mission.price;
       default:
@@ -397,85 +345,12 @@ const CreateMission = () => {
                 <Label htmlFor="location" className="text-sm font-medium">
                   Località *
                 </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    value={locationQuery}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setLocationQuery(value);
-                      if (!value) {
-                        setMission({
-                          ...mission,
-                          address: null
-                        });
-                      }
-                    }}
-                    onFocus={() => {
-                      if (blurTimeout.current) {
-                        clearTimeout(blurTimeout.current);
-                        blurTimeout.current = null;
-                      }
-                      setIsLocationFocused(true);
-                    }}
-                    onBlur={() => {
-                      blurTimeout.current = setTimeout(() => {
-                        setIsLocationFocused(false);
-                      }, 120);
-                    }}
-                    placeholder="es. Centro città, Via Roma 15"
-                    className="mt-1 pl-10"
+                <div className="mt-1">
+                  <LocationAutocomplete
+                    value={mission.location}
+                    onChange={(value) => setMission({ ...mission, location: value })}
+                    placeholder="es. Via Roma, Milano"
                   />
-                  {(isLocationFocused || trimmedLocationQuery.length >= 3) && (
-                    <div className="absolute top-full mt-2 w-full rounded-xl border border-border bg-popover shadow-lg">
-                      {locationError && (
-                        <p className="px-4 py-3 text-sm text-destructive">{locationError}</p>
-                      )}
-                      {!locationError && isLoadingSuggestions && (
-                        <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Caricamento suggerimenti...</span>
-                        </div>
-                      )}
-                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length < 3 && (
-                        <p className="px-4 py-3 text-sm text-muted-foreground">
-                          Digita almeno 3 caratteri per vedere i suggerimenti.
-                        </p>
-                      )}
-                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length >= 3 && suggestions.length === 0 && (
-                        <p className="px-4 py-3 text-sm text-muted-foreground">
-                          Nessun risultato trovato. Prova a essere più specifico.
-                        </p>
-                      )}
-                      {!locationError && suggestions.length > 0 && (
-                        <ul className="max-h-64 overflow-y-auto py-1">
-                          {suggestions.map((suggestion) => (
-                            <li key={suggestion.id}>
-                              <button
-                                type="button"
-                                className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 focus:bg-muted/80 focus:outline-none"
-                                onMouseDown={(event) => {
-                                  event.preventDefault();
-                                  handleSelectLocation(suggestion);
-                                }}
-                              >
-                                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-                                <span className="text-sm text-foreground">
-                                  {suggestion.primaryText}
-                                  {suggestion.secondaryText && (
-                                    <span className="block text-xs text-muted-foreground">
-                                      {suggestion.secondaryText}
-                                    </span>
-                                  )}
-                                </span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
               
