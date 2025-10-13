@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
@@ -76,6 +79,7 @@ const PreviewCard = ({ mission }: { mission: DraftMission }) => (
 const CreateMission = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
@@ -120,7 +124,12 @@ const CreateMission = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) {
+      toast({ title: "Autenticazione richiesta", description: "Devi essere loggato", variant: "destructive" });
+      navigate('/login?next=/create-mission');
+      return;
+    }
     if (!mission.title || !mission.description || !mission.category || !mission.duration || !mission.location || !mission.price) {
       toast({
         title: "Campi mancanti",
@@ -277,14 +286,11 @@ const CreateMission = () => {
                 <Label htmlFor="location" className="text-sm font-medium">
                   Località *
                 </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="location"
+                <div className="mt-1">
+                  <LocationAutocomplete
                     value={mission.location}
-                    onChange={(e) => setMission({ ...mission, location: e.target.value })}
-                    placeholder="es. Centro città, Via Roma 15"
-                    className="mt-1 pl-10"
+                    onChange={(value) => setMission({ ...mission, location: value })}
+                    placeholder="es. Via Roma, Milano"
                   />
                 </div>
               </div>
