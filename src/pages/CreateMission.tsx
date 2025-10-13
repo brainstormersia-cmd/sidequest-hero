@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { LocationAutocomplete } from "@/components/LocationAutocomplete";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
@@ -18,7 +18,17 @@ interface DraftMission {
   description: string;
   category: string;
   duration: string;
-  location: string;
+  address: {
+    label: string;
+    street: string;
+    number: string;
+    city: string;
+    province: string;
+    postal_code: string;
+    country: string;
+    lat: number | null;
+    lon: number | null;
+  } | null;
   price: string;
 }
 
@@ -55,7 +65,7 @@ const PreviewCard = ({ mission }: { mission: DraftMission }) => (
     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
       <div className="flex items-center gap-1">
         <MapPin className="w-3 h-3" />
-        <span>{mission.location}</span>
+        <span>{mission.address?.label || 'Da definire'}</span>
       </div>
       <div className="flex items-center gap-1">
         <Clock className="w-3 h-3" />
@@ -90,7 +100,7 @@ const CreateMission = () => {
     description: "",
     category: "",
     duration: "",
-    location: "",
+    address: null,
     price: ""
   });
 
@@ -141,7 +151,7 @@ const CreateMission = () => {
     }
 
     if (!mission.title || !mission.description || !mission.category || 
-        !mission.duration || !mission.location || !mission.price) {
+        !mission.duration || !mission.address || !mission.price) {
       toast({
         title: "Campi mancanti",
         description: "Completa tutti i campi obbligatori",
@@ -175,7 +185,18 @@ const CreateMission = () => {
           title: mission.title,
           description: mission.description,
           category_id: categoryId,
-          location: mission.location,
+          
+          // Address fields (backward compatible)
+          location: mission.address?.label || "",
+          street: mission.address?.street || null,
+          street_number: mission.address?.number || null,
+          city: mission.address?.city || null,
+          province: mission.address?.province || null,
+          postal_code: mission.address?.postal_code || null,
+          country: mission.address?.country || "Italia",
+          lat: mission.address?.lat || null,
+          lon: mission.address?.lon || null,
+          
           price: parseFloat(mission.price),
           duration_hours: durationHours,
           status: 'open'
@@ -212,7 +233,7 @@ const CreateMission = () => {
       case 2:
         return mission.category && mission.duration;
       case 3:
-        return mission.location;
+        return mission.address !== null && mission.address.street !== "";
       case 4:
         return mission.price;
       default:
@@ -346,10 +367,10 @@ const CreateMission = () => {
                   Località *
                 </Label>
                 <div className="mt-1">
-                  <LocationAutocomplete
-                    value={mission.location}
-                    onChange={(value) => setMission({ ...mission, location: value })}
-                    placeholder="es. Via Roma, Milano"
+                  <AddressAutocomplete
+                    value={mission.address?.label || ""}
+                    onSelect={(suggestion) => setMission({ ...mission, address: suggestion })}
+                    placeholder="es. Via Roma 10, Milano"
                   />
                 </div>
               </div>

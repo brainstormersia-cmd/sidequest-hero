@@ -145,49 +145,73 @@ export type Database = {
       missions: {
         Row: {
           category_id: string | null
+          city: string | null
           completed_at: string | null
+          country: string | null
           created_at: string | null
           deadline: string | null
           description: string
           duration_hours: number | null
           id: string
+          lat: number | null
           location: string
+          lon: number | null
           owner_id: string
+          postal_code: string | null
           price: number
+          province: string | null
           runner_id: string | null
           status: string | null
+          street: string | null
+          street_number: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location: string
+          lon?: number | null
           owner_id: string
+          postal_code?: string | null
           price: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location?: string
+          lon?: number | null
           owner_id?: string
+          postal_code?: string | null
           price?: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -277,8 +301,11 @@ export type Database = {
           missions_completed: number | null
           missions_created: number | null
           phone: string | null
+          postal_code: string | null
           rating_average: number | null
           rating_count: number | null
+          street: string | null
+          street_number: string | null
           total_earnings: number | null
           updated_at: string | null
           user_id: string
@@ -296,8 +323,11 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
           user_id: string
@@ -315,8 +345,11 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
           user_id?: string
