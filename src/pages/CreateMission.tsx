@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,8 +10,20 @@ import { Textarea } from "@/components/ui/textarea";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Euro, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMapboxAutocomplete, type MapboxSuggestion } from "@/hooks/use-mapbox-autocomplete";
+
+interface DraftMission {
+  title: string;
+  description: string;
+  category: string;
+  duration: string;
+  location: string;
+  price: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
 
 interface DraftMission {
   title: string;
@@ -100,9 +112,33 @@ const CreateMission = () => {
     description: "",
     category: "",
     duration: "",
-    address: null,
-    price: ""
+    location: "",
+    price: "",
+    latitude: null,
+    longitude: null
   });
+  const [locationQuery, setLocationQuery] = useState("");
+  const [isLocationFocused, setIsLocationFocused] = useState(false);
+  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const trimmedLocationQuery = locationQuery.trim();
+  const { suggestions, isLoading: isLoadingSuggestions, error: locationError } = useMapboxAutocomplete(
+    trimmedLocationQuery,
+    {
+      enabled: currentStep === 3 && trimmedLocationQuery.length >= 3,
+    }
+  );
+
+  const handleSelectLocation = (suggestion: MapboxSuggestion) => {
+    setMission((prev) => ({
+      ...prev,
+      location: suggestion.placeName,
+      latitude: Number.isFinite(suggestion.latitude) ? suggestion.latitude : prev.latitude ?? null,
+      longitude: Number.isFinite(suggestion.longitude) ? suggestion.longitude : prev.longitude ?? null,
+    }));
+    setLocationQuery(suggestion.placeName);
+    setIsLocationFocused(false);
+  };
 
   // Fetch categories from database
   const { data: categories } = useQuery({
@@ -366,12 +402,85 @@ const CreateMission = () => {
                 <Label htmlFor="location" className="text-sm font-medium">
                   Località *
                 </Label>
-                <div className="mt-1">
-                  <AddressAutocomplete
-                    value={mission.address?.label || ""}
-                    onSelect={(suggestion) => setMission({ ...mission, address: suggestion })}
-                    placeholder="es. Via Roma 10, Milano"
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="location"
+                    value={locationQuery}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setLocationQuery(value);
+                      setMission({
+                        ...mission,
+                        location: value,
+                        latitude: null,
+                        longitude: null,
+                      });
+                    }}
+                    onFocus={() => {
+                      if (blurTimeout.current) {
+                        clearTimeout(blurTimeout.current);
+                        blurTimeout.current = null;
+                      }
+                      setIsLocationFocused(true);
+                    }}
+                    onBlur={() => {
+                      blurTimeout.current = setTimeout(() => {
+                        setIsLocationFocused(false);
+                      }, 120);
+                    }}
+                    placeholder="es. Centro città, Via Roma 15"
+                    className="mt-1 pl-10"
                   />
+                  {(isLocationFocused || trimmedLocationQuery.length >= 3) && (
+                    <div className="absolute top-full mt-2 w-full rounded-xl border border-border bg-popover shadow-lg">
+                      {locationError && (
+                        <p className="px-4 py-3 text-sm text-destructive">{locationError}</p>
+                      )}
+                      {!locationError && isLoadingSuggestions && (
+                        <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Caricamento suggerimenti...</span>
+                        </div>
+                      )}
+                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length < 3 && (
+                        <p className="px-4 py-3 text-sm text-muted-foreground">
+                          Digita almeno 3 caratteri per vedere i suggerimenti.
+                        </p>
+                      )}
+                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length >= 3 && suggestions.length === 0 && (
+                        <p className="px-4 py-3 text-sm text-muted-foreground">
+                          Nessun risultato trovato. Prova a essere più specifico.
+                        </p>
+                      )}
+                      {!locationError && suggestions.length > 0 && (
+                        <ul className="max-h-64 overflow-y-auto py-1">
+                          {suggestions.map((suggestion) => (
+                            <li key={suggestion.id}>
+                              <button
+                                type="button"
+                                className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 focus:bg-muted/80 focus:outline-none"
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleSelectLocation(suggestion);
+                                }}
+                              >
+                                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                                <span className="text-sm text-foreground">
+                                  {suggestion.primaryText}
+                                  {suggestion.secondaryText && (
+                                    <span className="block text-xs text-muted-foreground">
+                                      {suggestion.secondaryText}
+                                    </span>
+                                  )}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               

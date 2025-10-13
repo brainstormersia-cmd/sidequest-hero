@@ -93,16 +93,6 @@ const MissionDetails = () => {
   const [userRole, setUserRole] = useState<"runner" | "owner" | "guest">("guest");
 
   const fetchMissionDetails = useCallback(async () => {
-    if (!id || id.startsWith('fallback')) {
-      toast({ 
-        title: "Missione non disponibile", 
-        description: "Questa missione non esiste o è stata rimossa",
-        variant: "destructive" 
-      });
-      navigate('/missions');
-      return;
-    }
-
     try {
       const { data: missionData, error } = await supabase
         .from('missions')

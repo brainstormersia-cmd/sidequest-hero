@@ -36,15 +36,14 @@ const Landing = () => {
 
   // Auto-redirect if already logged in
   useEffect(() => {
-    if (loading || !user || activeFlow !== 'landing') return;
-    
-    const onboardingCompleted = localStorage.getItem('sidequest_onboarding_completed') === 'true';
-    if (onboardingCompleted) {
-      navigate('/dashboard');
-    } else {
-      navigate('/onboarding');
+    if (!loading && user && activeFlow === 'landing') {
+      if (profile?.onboarding_completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     }
-  }, [user, loading, activeFlow, navigate]);
+  }, [user, loading, profile, activeFlow, navigate]);
 
   if (activeFlow === 'register') {
     return <MultiStepRegistration onBack={() => setActiveFlow('landing')} />;

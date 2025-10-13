@@ -51,27 +51,45 @@ export function LoginForm({ onBack, nextPath }: LoginFormProps) {
       return;
     }
 
-    toast({
-      title: "Benvenuto!",
-      description: "Login effettuato con successo",
-    });
+    try {
+      toast({
+        title: "Benvenuto!",
+        description: "Login effettuato con successo",
+      });
 
-    if (nextPath) {
-      navigate(nextPath, { replace: true });
+      if (nextPath) {
+        navigate(nextPath, { replace: true });
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+
+      if (!userId) {
+        navigate('/dashboard');
+        return;
+      }
+
+      const { data: profileRow, error: profileError } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching profile after login', profileError);
+        navigate('/dashboard');
+        return;
+      }
+
+      if (profileRow?.onboarding_completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Check localStorage for onboarding completion
-    const onboardingCompleted = localStorage.getItem('sidequest_onboarding_completed') === 'true';
-    
-    if (onboardingCompleted) {
-      navigate('/dashboard');
-    } else {
-      navigate('/onboarding');
-    }
-    
-    setLoading(false);
   };
 
   return (

@@ -24,21 +24,17 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleGuard from "./routes/RoleGuard";
-import ChatList from "./pages/ChatList";
-import Badges from "./pages/Badges";
-import UserCatalog from "./pages/UserCatalog";
-import UserProfile from "./pages/UserProfile";
-import Categories from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const { isOpen } = useSidebar();
-  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-  const hideBottomNav = isDesktop || location.pathname === "/" || location.pathname === "/onboarding" || 
-    location.pathname.startsWith("/chat") || location.pathname === "/login";
-
+  const hideBottomNav =
+    location.pathname === "/" ||
+    location.pathname === "/onboarding" ||
+    location.pathname.startsWith("/chat") ||
+    location.pathname === "/login";
+  
   return (
     <div className="flex min-h-screen w-full">
       <DesktopSidebar />
@@ -74,8 +70,22 @@ const AppContent = () => {
             </ProtectedRoute>
           )}
         />
-        <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
-        <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route
+          path="/chat"
+          element={(
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/chat/:id"
+          element={(
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          )}
+        />
         <Route
           path="/wallet"
           element={(
@@ -112,11 +122,6 @@ const AppContent = () => {
             </ProtectedRoute>
           )}
         />
-        <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute><UserCatalog /></ProtectedRoute>} />
-        <Route path="/users/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/debug/auth" element={<DebugAuth />} />
         <Route path="*" element={<NotFound />} />
         </Routes>
         {!hideBottomNav && <BottomNavigation />}

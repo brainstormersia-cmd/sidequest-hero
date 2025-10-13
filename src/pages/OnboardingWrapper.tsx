@@ -20,15 +20,12 @@ const OnboardingWrapper = () => {
       return;
     }
 
-    // Check localStorage for onboarding completion
-    const onboardingCompleted = localStorage.getItem('sidequest_onboarding_completed') === 'true';
-    
-    if (onboardingCompleted) {
+    if (profile?.onboarding_completed) {
       navigate('/dashboard');
     } else {
       setShowOnboarding(true);
     }
-  }, [user, loading, navigate]);
+  }, [user, profile, loading, navigate]);
 
   if (loading) {
     return (
@@ -48,9 +45,17 @@ const OnboardingWrapper = () => {
   }
 
   const handleComplete = async () => {
-    // Set onboarding completion in localStorage
-    localStorage.setItem('sidequest_onboarding_completed', 'true');
-    
+    const { error } = await updateProfile({ onboarding_completed: true });
+
+    if (error) {
+      toast({
+        title: "Aggiornamento profilo non riuscito",
+        description: "Riprova più tardi a completare l'onboarding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setShowOnboarding(false);
     navigate('/dashboard');
   };
