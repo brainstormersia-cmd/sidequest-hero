@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Wallet, User } from "lucide-react";
+import { Briefcase, MapPin, Wallet, User, Trophy } from "lucide-react";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
@@ -16,6 +16,11 @@ const BottomNavigation = () => {
       icon: MapPin,
       label: "Missioni",
       path: "/missions"
+    },
+    {
+      icon: Trophy,
+      label: "Badge",
+      path: "/badges"
     },
     {
       icon: Wallet,

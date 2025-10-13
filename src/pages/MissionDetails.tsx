@@ -16,6 +16,14 @@ interface Mission {
   description: string;
   price: number;
   location: string;
+  street?: string;
+  street_number?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  country?: string;
+  lat?: number;
+  lon?: number;
   duration_hours: number;
   status: 'open' | 'in_progress' | 'pending_completion' | 'completed' | 'cancelled';
   created_at: string;
@@ -94,6 +102,14 @@ const MissionDetails = () => {
           description,
           price,
           location,
+          street,
+          street_number,
+          city,
+          province,
+          postal_code,
+          country,
+          lat,
+          lon,
           duration_hours,
           status,
           created_at,
@@ -287,7 +303,7 @@ const MissionDetails = () => {
   const timelineSteps = getTimelineSteps(mission.status);
 
   return (
-    <div className="min-h-screen bg-background pb-6">
+    <div className="min-h-screen bg-background lg:ml-64 pb-6">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="px-4 sm:px-6 py-3 sm:py-4">
@@ -361,7 +377,7 @@ const MissionDetails = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/profile/${mission.profiles.first_name?.toLowerCase()}-${mission.profiles.last_name?.toLowerCase()}`)}
+              onClick={() => navigate('/profile')}
             >
               <User className="w-4 h-4 mr-2" />
               Profilo
@@ -383,7 +399,18 @@ const MissionDetails = () => {
               <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-foreground">Ubicazione</p>
-                <p className="text-sm text-muted-foreground">{mission.location}</p>
+                {mission.street ? (
+                  <>
+                    <p className="text-sm text-foreground">
+                      {mission.street} {mission.street_number}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {mission.postal_code} {mission.city} {mission.province && `(${mission.province})`}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{mission.location}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-3">

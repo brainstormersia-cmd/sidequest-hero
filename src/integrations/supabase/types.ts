@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon: string
+          id?: string
+          name: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          mission_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mission_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mission_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: true
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -83,49 +145,73 @@ export type Database = {
       missions: {
         Row: {
           category_id: string | null
+          city: string | null
           completed_at: string | null
+          country: string | null
           created_at: string | null
           deadline: string | null
           description: string
           duration_hours: number | null
           id: string
+          lat: number | null
           location: string
+          lon: number | null
           owner_id: string
+          postal_code: string | null
           price: number
+          province: string | null
           runner_id: string | null
           status: string | null
+          street: string | null
+          street_number: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location: string
+          lon?: number | null
           owner_id: string
+          postal_code?: string | null
           price: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location?: string
+          lon?: number | null
           owner_id?: string
+          postal_code?: string | null
           price?: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -215,8 +301,11 @@ export type Database = {
           missions_completed: number | null
           missions_created: number | null
           phone: string | null
+          postal_code: string | null
           rating_average: number | null
           rating_count: number | null
+          street: string | null
+          street_number: string | null
           total_earnings: number | null
           updated_at: string | null
           user_id: string
@@ -234,8 +323,11 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
           user_id: string
@@ -253,8 +345,11 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
           user_id?: string
@@ -313,6 +408,36 @@ export type Database = {
           },
         ]
       }
+      streets: {
+        Row: {
+          city: string
+          country: string | null
+          created_at: string | null
+          id: string
+          postal_code: string | null
+          province: string | null
+          street_name: string
+        }
+        Insert: {
+          city: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          postal_code?: string | null
+          province?: string | null
+          street_name: string
+        }
+        Update: {
+          city?: string
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          postal_code?: string | null
+          province?: string | null
+          street_name?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -358,6 +483,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          badge_id: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
           },
         ]
       }

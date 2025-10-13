@@ -5,6 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import BottomNavigation from "./components/ui/bottom-navigation";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { DesktopSidebar } from "./components/DesktopSidebar";
+import { cn } from "@/lib/utils";
 import Landing from "./pages/Landing";
 import OnboardingWrapper from "./pages/OnboardingWrapper";
 import CommunityDashboard from "./pages/CommunityDashboard";
@@ -15,6 +19,7 @@ import Wallet from "./pages/Wallet";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import CreateMission from "./pages/CreateMission";
+import DebugAuth from "./pages/DebugAuth";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -31,8 +36,13 @@ const AppContent = () => {
     location.pathname === "/login";
   
   return (
-    <>
-      <Routes>
+    <div className="flex min-h-screen w-full">
+      <DesktopSidebar />
+      <div className={cn(
+        "flex-1 transition-all duration-300",
+        isOpen ? "lg:ml-64" : "lg:ml-16"
+      )}>
+        <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route
@@ -113,9 +123,10 @@ const AppContent = () => {
           )}
         />
         <Route path="*" element={<NotFound />} />
-      </Routes>
-      {!hideBottomNav && <BottomNavigation />}
-    </>
+        </Routes>
+        {!hideBottomNav && <BottomNavigation />}
+      </div>
+    </div>
   );
 };
 
@@ -126,7 +137,11 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppContent />
+          <SidebarProvider>
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
+          </SidebarProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

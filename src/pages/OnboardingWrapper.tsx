@@ -14,7 +14,7 @@ const OnboardingWrapper = () => {
   useEffect(() => {
     if (loading) return;
 
-    // If user is not authenticated, redirect to landing
+    // If user is not authenticated, redirect to login
     if (!user) {
       navigate('/login?next=%2Fonboarding');
       return;
@@ -29,7 +29,7 @@ const OnboardingWrapper = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md space-y-4">
           <Skeleton className="h-12 w-12 rounded-xl mx-auto" />
           <Skeleton className="h-8 w-3/4 mx-auto" />

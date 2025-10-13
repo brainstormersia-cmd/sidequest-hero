@@ -101,6 +101,7 @@ const MissionCard = ({
   ownerName
 }: MissionListItem) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const IconComponent = categoryIcons[category];
 
   return (
@@ -137,14 +138,14 @@ const MissionCard = ({
             variant="ghost"
             size="sm"
             className="text-secondary hover:text-secondary/80 px-3"
-            onClick={() => navigate(`/missions/${id}`)}
+            onClick={handleNavigate}
           >
             Dettagli
           </Button>
           <Button
             size="sm"
             className="bg-primary text-primary-foreground hover:bg-primary/90 px-4"
-            onClick={() => navigate(`/missions/${id}`)}
+            onClick={handleNavigate}
           >
             Accetta
           </Button>
