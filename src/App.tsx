@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import BottomNavigation from "./components/ui/bottom-navigation";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { DesktopSidebar } from "./components/DesktopSidebar";
+import { cn } from "@/lib/utils";
 import Landing from "./pages/Landing";
 import OnboardingWrapper from "./pages/OnboardingWrapper";
 import CommunityDashboard from "./pages/CommunityDashboard";
@@ -32,14 +34,19 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
+  const { isOpen } = useSidebar();
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
   const hideBottomNav = isDesktop || location.pathname === "/" || location.pathname === "/onboarding" || 
     location.pathname.startsWith("/chat") || location.pathname === "/login";
 
   return (
-    <>
+    <div className="flex min-h-screen w-full">
       <DesktopSidebar />
-      <Routes>
+      <div className={cn(
+        "flex-1 transition-all duration-300",
+        isOpen ? "lg:ml-64" : "lg:ml-16"
+      )}>
+        <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route
@@ -111,9 +118,10 @@ const AppContent = () => {
         <Route path="/categories" element={<Categories />} />
         <Route path="/debug/auth" element={<DebugAuth />} />
         <Route path="*" element={<NotFound />} />
-      </Routes>
-      {!hideBottomNav && <BottomNavigation />}
-    </>
+        </Routes>
+        {!hideBottomNav && <BottomNavigation />}
+      </div>
+    </div>
   );
 };
 
@@ -124,9 +132,11 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <ErrorBoundary>
-            <AppContent />
-          </ErrorBoundary>
+          <SidebarProvider>
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
+          </SidebarProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

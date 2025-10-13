@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -101,7 +101,21 @@ const MissionCard = ({
   ownerName
 }: MissionListItem) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const IconComponent = categoryIcons[category];
+
+  const handleNavigate = () => {
+    // Prevent navigation for fallback missions
+    if (id.startsWith('fallback-')) {
+      toast({
+        title: "Missione demo",
+        description: "Questa è una missione di esempio. Crea una missione reale per iniziare!",
+        variant: "default"
+      });
+      return;
+    }
+    navigate(`/missions/${id}`);
+  };
 
   return (
     <Card className="mission-card">
@@ -137,14 +151,14 @@ const MissionCard = ({
             variant="ghost"
             size="sm"
             className="text-secondary hover:text-secondary/80 px-3"
-            onClick={() => navigate(`/missions/${id}`)}
+            onClick={handleNavigate}
           >
             Dettagli
           </Button>
           <Button
             size="sm"
             className="bg-primary text-primary-foreground hover:bg-primary/90 px-4"
-            onClick={() => navigate(`/missions/${id}`)}
+            onClick={handleNavigate}
           >
             Accetta
           </Button>
@@ -189,9 +203,27 @@ const filters = [
 const Missions = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const fallbackNotifiedRef = useRef(false);
+
+  // Realtime subscription for new missions
+  useEffect(() => {
+    const channel = supabase
+      .channel('missions-changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'missions' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['missions'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const missionsQuery = useInfiniteQuery({
     queryKey: ['missions', searchQuery, activeFilter],

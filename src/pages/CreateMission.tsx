@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,7 @@ const CreateMission = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
@@ -92,15 +94,18 @@ const CreateMission = () => {
     price: ""
   });
 
-  const categories = [
-    { value: "delivery", label: "Consegne", icon: "🚛" },
-    { value: "pet", label: "Pet sitting", icon: "🐕" },
-    { value: "shopping", label: "Spesa e acquisti", icon: "🛒" },
-    { value: "handyman", label: "Lavori domestici", icon: "🔨" },
-    { value: "cleaning", label: "Pulizie", icon: "🧹" },
-    { value: "moving", label: "Traslochi", icon: "📦" },
-    { value: "other", label: "Altro", icon: "👥" }
-  ];
+  // Fetch categories from database
+  const { data: categories } = useQuery({
+    queryKey: ['mission-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('mission_categories')
+        .select('id, name, icon')
+        .order('name');
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   const durations = [
     { value: "30min", label: "30 minuti" },
@@ -126,11 +131,17 @@ const CreateMission = () => {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast({ title: "Autenticazione richiesta", description: "Devi essere loggato", variant: "destructive" });
+      toast({ 
+        title: "Autenticazione richiesta", 
+        description: "Devi essere loggato per creare una missione",
+        variant: "destructive" 
+      });
       navigate('/login?next=/create-mission');
       return;
     }
-    if (!mission.title || !mission.description || !mission.category || !mission.duration || !mission.location || !mission.price) {
+
+    if (!mission.title || !mission.description || !mission.category || 
+        !mission.duration || !mission.location || !mission.price) {
       toast({
         title: "Campi mancanti",
         description: "Completa tutti i campi obbligatori",
@@ -139,11 +150,59 @@ const CreateMission = () => {
       return;
     }
 
-    toast({
-      title: "Missione pubblicata!",
-      description: "La tua missione è ora visibile agli altri utenti",
-    });
-    navigate("/missions");
+    try {
+      // Find category_id by name
+      const { data: categoryData } = await supabase
+        .from('mission_categories')
+        .select('id')
+        .eq('id', mission.category)
+        .maybeSingle();
+
+      const categoryId = categoryData?.id || null;
+
+      // Convert duration to hours
+      const durationMap: Record<string, number> = {
+        '30min': 0.5, '1h': 1, '2h': 2, '3h': 3,
+        'halfday': 4, 'fullday': 8, 'multiday': 16
+      };
+      const durationHours = durationMap[mission.duration] || 1;
+
+      // Insert mission
+      const { data: newMission, error: insertError } = await supabase
+        .from('missions')
+        .insert({
+          owner_id: user.id,
+          title: mission.title,
+          description: mission.description,
+          category_id: categoryId,
+          location: mission.location,
+          price: parseFloat(mission.price),
+          duration_hours: durationHours,
+          status: 'open'
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Invalidate queries to update lists
+      await queryClient.invalidateQueries({ queryKey: ['missions'] });
+      await queryClient.invalidateQueries({ queryKey: ['recommended-missions'] });
+
+      toast({ 
+        title: "✅ Missione pubblicata!", 
+        description: "La tua missione è ora visibile nel catalogo" 
+      });
+      
+      navigate(`/missions/${newMission.id}`);
+    } catch (error) {
+      console.error('Error creating mission:', error);
+      toast({ 
+        title: "Errore", 
+        description: "Impossibile pubblicare la missione. Riprova.", 
+        variant: "destructive" 
+      });
+    }
   };
 
   const canProceed = () => {
@@ -238,15 +297,15 @@ const CreateMission = () => {
                   Categoria *
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
-                  {categories.map((category) => (
+                  {categories?.map((category) => (
                     <Button
-                      key={category.value}
-                      variant={mission.category === category.value ? "default" : "outline"}
+                      key={category.id}
+                      variant={mission.category === category.id ? "default" : "outline"}
                       className="h-auto p-3 flex-col gap-2"
-                      onClick={() => setMission({ ...mission, category: category.value })}
+                      onClick={() => setMission({ ...mission, category: category.id })}
                     >
                       <span className="text-lg">{category.icon}</span>
-                      <span className="text-xs text-center">{category.label}</span>
+                      <span className="text-xs text-center">{category.name}</span>
                     </Button>
                   ))}
                 </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +73,25 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
   const [walletBalance] = useState(127.50);
+
+  // Realtime subscription for new missions
+  useEffect(() => {
+    const channel = supabase
+      .channel('dashboard-missions-changes')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'missions' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['recommended-missions'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Fetch recommended missions
   const { data: recommendedMissions, isLoading: loadingMissions } = useQuery({
