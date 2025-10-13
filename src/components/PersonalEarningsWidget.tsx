@@ -28,25 +28,25 @@ export const PersonalEarningsWidget = ({
   return (
     <Card className="p-6 bg-gradient-to-br from-primary/5 via-success/5 to-warning/5 border-primary/20 shadow-floating">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-primary" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+            <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">I Tuoi Guadagni</h3>
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground">I Tuoi Guadagni</h3>
             <p className="text-xs text-muted-foreground">{missionCount} missioni</p>
           </div>
         </div>
-        <Badge className="bg-success/20 text-success border-success/30">
+        <Badge className="bg-success/20 text-success border-success/30 self-start sm:self-auto">
           <TrendingUp className="w-3 h-3 mr-1" />
           +{weeklyChange}%
         </Badge>
       </div>
 
       {/* Big Number */}
-      <div className="mb-4">
-        <div className="text-4xl font-black text-foreground mb-1">
+      <div className="mb-3 sm:mb-4">
+        <div className="text-3xl sm:text-4xl font-black text-foreground mb-1">
           <AnimatedCounter 
             value={totalEarnings} 
             prefix="€"
@@ -55,14 +55,14 @@ export const PersonalEarningsWidget = ({
             celebration
           />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Totale guadagnato • Questa settimana: 
           <span className="font-semibold text-success ml-1">€{weeklyEarnings}</span>
         </p>
       </div>
 
-      {/* Sparkline Chart */}
-      <div className="mb-4">
+      {/* Sparkline Chart - Hidden on small mobile */}
+      <div className="mb-3 sm:mb-4 hidden sm:block">
         <EarningsChart 
           data={mockWeeklyEarnings}
           variant="sparkline"
@@ -80,13 +80,13 @@ export const PersonalEarningsWidget = ({
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-background/50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-foreground">{missionCount}</p>
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="bg-background/50 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-foreground">{missionCount}</p>
           <p className="text-xs text-muted-foreground">Completate</p>
         </div>
-        <div className="bg-background/50 rounded-xl p-3 text-center">
-          <p className="text-2xl font-bold text-primary">
+        <div className="bg-background/50 rounded-xl p-2 sm:p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-primary">
             €{(totalEarnings / Math.max(missionCount, 1)).toFixed(0)}
           </p>
           <p className="text-xs text-muted-foreground">Media/missione</p>
@@ -95,7 +95,7 @@ export const PersonalEarningsWidget = ({
 
       {/* CTA Button */}
       <Button 
-        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-card h-12 font-semibold group"
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-card h-11 sm:h-12 text-sm sm:text-base font-semibold group touch-manipulation"
         onClick={() => navigate('/wallet')}
       >
         <Wallet className="w-4 h-4 mr-2" />

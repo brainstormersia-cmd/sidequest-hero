@@ -94,6 +94,22 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Touch-friendly interactions */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 214, 10, 0.2);
+  }
+
+  /* Ensure minimum tap target size on mobile */
+  @media (hover: none) {
+    button:not(.inline-button), 
+    a:not(.inline-link),
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
 }
 
 @layer components {
@@ -159,6 +175,28 @@
   
   .animate-float {
     animation: float 6s ease-in-out infinite;
+  }
+
+  /* Reduce animations on mobile for better performance */
+  @media (max-width: 768px) {
+    .animate-float {
+      animation-duration: 8s;
+    }
+  }
+
+  /* Disable complex animations for users with reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-fade-in,
+    .animate-count-up,
+    .animate-celebration {
+      animation: none;
+    }
+    
+    .hover-scale:hover,
+    .transition-bounce {
+      transform: none;
+    }
   }
   
   .animate-count-up {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { ArrowRight, Search, DollarSign, Briefcase, Eye } from "lucide-react";
 import sidequestLogo from "@/assets/sidequest-logo.jpg";
 import { MultiStepRegistration } from "@/components/MultiStepRegistration";
 import { LoginForm } from "@/components/LoginForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FeatureCard = ({ 
   icon, 
@@ -31,7 +32,20 @@ const FeatureCard = ({
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [activeFlow, setActiveFlow] = useState<'landing' | 'register' | 'login' | 'explore'>('landing');
+
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (user && !loading && activeFlow === 'landing') {
+      const hasCompletedOnboarding = localStorage.getItem('sidequest_onboarding_completed');
+      if (hasCompletedOnboarding) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
+    }
+  }, [user, loading, activeFlow, navigate]);
 
   if (activeFlow === 'register') {
     return <MultiStepRegistration onBack={() => setActiveFlow('landing')} />;
@@ -59,23 +73,23 @@ const Landing = () => {
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
         {/* Logo */}
-        <div className="mb-6 animate-fade-in">
+        <div className="mb-4 md:mb-6 animate-fade-in">
           <img 
             src={sidequestLogo} 
             alt="SideQuest" 
-            className="w-32 h-32 rounded-3xl shadow-floating hover:scale-105 transition-bounce border-4 border-primary/20" 
+            className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-3xl shadow-floating hover:scale-105 transition-bounce border-4 border-primary/20" 
           />
         </div>
 
         {/* Hero Title */}
-        <div className="text-center mb-6 animate-fade-in animation-delay-200">
-          <h1 className="text-6xl font-bold text-foreground mb-3 text-balance">
+        <div className="text-center mb-4 md:mb-6 animate-fade-in animation-delay-200">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-2 md:mb-3 text-balance">
             Benvenuto in
           </h1>
-          <h1 className="text-6xl font-black text-primary mb-4 text-balance tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-black text-primary mb-3 md:mb-4 text-balance tracking-tight">
             SideQuest
           </h1>
-          <p className="text-foreground/80 text-lg text-balance max-w-md mx-auto leading-relaxed font-medium">
+          <p className="text-foreground/80 text-base md:text-lg text-balance max-w-md mx-auto leading-relaxed font-medium px-4">
             Fai quello che ti piace. Guadagna. Aiuta la tua città. 🚀
           </p>
         </div>
@@ -97,19 +111,19 @@ const Landing = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="w-full max-w-sm space-y-3 mb-10 animate-fade-in animation-delay-600">
+        <div className="w-full max-w-sm space-y-3 mb-8 md:mb-10 animate-fade-in animation-delay-600 px-4">
           <Button 
             onClick={() => setActiveFlow('register')}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-16 text-xl font-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(255,214,10,0.3)] hover:shadow-[12px_12px_0px_0px_rgba(255,214,10,0.4)] transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] active:translate-x-0 active:translate-y-0 active:shadow-[4px_4px_0px_0px_rgba(255,214,10,0.3)]"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-14 md:h-16 text-lg md:text-xl font-black rounded-2xl md:rounded-3xl shadow-[8px_8px_0px_0px_rgba(255,214,10,0.3)] hover:shadow-[12px_12px_0px_0px_rgba(255,214,10,0.4)] transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] active:translate-x-0 active:translate-y-0 active:shadow-[4px_4px_0px_0px_rgba(255,214,10,0.3)] touch-manipulation"
           >
             🚀 Inizia la tua avventura
-            <ArrowRight className="w-6 h-6 ml-2" />
+            <ArrowRight className="w-5 h-5 md:w-6 md:h-6 ml-2" />
           </Button>
           
           <Button 
             onClick={() => setActiveFlow('login')}
             variant="outline"
-            className="w-full border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background h-14 text-lg font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95"
+            className="w-full border-3 md:border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background h-12 md:h-14 text-base md:text-lg font-bold rounded-xl md:rounded-2xl transition-all hover:scale-[1.02] active:scale-95 touch-manipulation"
           >
             Bentornato, Sidequester! 👋
           </Button>
@@ -117,15 +131,15 @@ const Landing = () => {
           <Button 
             onClick={() => setActiveFlow('explore')}
             variant="ghost"
-            className="w-full text-muted-foreground hover:text-foreground hover:bg-muted/50 h-12 text-base font-medium rounded-xl transition-smooth"
+            className="w-full text-muted-foreground hover:text-foreground hover:bg-muted/50 h-11 md:h-12 text-sm md:text-base font-medium rounded-xl transition-smooth touch-manipulation"
           >
-            <Eye className="w-5 h-5 mr-2" />
+            <Eye className="w-4 h-4 md:w-5 md:h-5 mr-2" />
             Prima dai un'occhiata 👀
           </Button>
         </div>
 
         {/* Feature Cards */}
-        <div className="w-full max-w-md space-y-3 animate-fade-in animation-delay-800">
+        <div className="w-full max-w-md space-y-3 animate-fade-in animation-delay-800 px-4">
           <FeatureCard
             icon={<Search className="w-8 h-8 text-primary" />}
             title="🎯 Trova quest"

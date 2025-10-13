@@ -45,9 +45,15 @@ const OnboardingWrapper = () => {
     return null;
   }
 
+  const handleComplete = () => {
+    localStorage.setItem('sidequest_onboarding_completed', 'true');
+    setShowOnboarding(false);
+    navigate('/dashboard');
+  };
+
   return (
     <FirstTimeOnboarding 
-      onComplete={() => setShowOnboarding(false)} 
+      onComplete={handleComplete} 
     />
   );
 };

@@ -173,10 +173,10 @@ export const LiveActivityFeed = () => {
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="p-3 hover:bg-muted/30 transition-smooth cursor-pointer animate-fade-in flex items-start gap-3"
+              className="p-2 sm:p-3 hover:bg-muted/30 transition-smooth cursor-pointer animate-fade-in flex items-start gap-2 sm:gap-3"
             >
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border",
+                "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 border",
                 getEventColor(activity.type)
               )}>
                 {getEventIcon(activity.type)}
@@ -185,7 +185,7 @@ export const LiveActivityFeed = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground line-clamp-1">
+                    <p className="text-xs sm:text-sm font-medium text-foreground line-clamp-1">
                       {activity.title}
                     </p>
                     <p className="text-xs text-muted-foreground line-clamp-1">
@@ -193,12 +193,12 @@ export const LiveActivityFeed = () => {
                     </p>
                   </div>
                   {activity.amount && (
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-xs whitespace-nowrap">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-xs whitespace-nowrap flex-shrink-0">
                       €{activity.amount}
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">{activity.timestamp}</p>
               </div>
             </div>
           ))}

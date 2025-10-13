@@ -133,37 +133,45 @@ export function MultiStepRegistration({ onBack }: MultiStepRegistrationProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Floating shapes background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-20 h-20 md:w-32 md:h-32 bg-primary/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 md:w-40 md:h-40 bg-primary/5 rounded-full blur-3xl animate-float animation-delay-200"></div>
+        <div className="absolute bottom-40 left-1/4 w-22 h-22 md:w-36 md:h-36 bg-primary/10 rounded-full blur-3xl animate-float animation-delay-400"></div>
+        <div className="absolute bottom-20 right-1/3 w-18 h-18 md:w-28 md:h-28 bg-primary/5 rounded-full blur-3xl animate-float animation-delay-600"></div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 relative z-10">
         {/* Header */}
-        <div className="w-full max-w-md mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="w-full max-w-sm md:max-w-md mb-6 md:mb-8">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleBack}
-              className="text-white hover:bg-white/10 rounded-full"
+              className="text-foreground hover:bg-muted rounded-full min-h-[44px] min-w-[44px]"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
             </Button>
             <img 
               src={sidequestLogo} 
               alt="SideQuest" 
-              className="w-12 h-12 rounded-xl" 
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl" 
             />
-            <div className="w-10" /> {/* Spacer */}
+            <div className="w-10 md:w-10" /> {/* Spacer */}
           </div>
           
-          <Progress value={progress} className="mb-4 bg-white/20" />
+          <Progress value={progress} className="mb-4 bg-muted" />
           
-          <div className="text-center text-white">
-            <h1 className="text-2xl font-bold mb-1">{steps[currentStep].title}</h1>
-            <p className="text-white/80">{steps[currentStep].description}</p>
+          <div className="text-center text-foreground">
+            <h1 className="text-xl md:text-2xl font-bold mb-1">{steps[currentStep].title}</h1>
+            <p className="text-muted-foreground text-sm">{steps[currentStep].description}</p>
           </div>
         </div>
 
         {/* Step Content */}
-        <Card className="w-full max-w-md p-6 bg-white/95 backdrop-blur-sm border-0 shadow-floating">
+        <Card className="w-full max-w-sm md:max-w-md p-4 sm:p-6 bg-card backdrop-blur-sm border-2 border-primary/20 shadow-floating">
           {currentStep === 0 && (
             <div className="space-y-4">
               <div>
@@ -174,7 +182,7 @@ export function MultiStepRegistration({ onBack }: MultiStepRegistrationProps) {
                   id="firstName"
                   value={formData.firstName}
                   onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                  className="mt-1 h-12 border-0 bg-muted/50 focus:bg-card transition-smooth"
+                  className="mt-1 h-11 md:h-12 border-0 bg-muted/50 focus:bg-card transition-smooth"
                   placeholder="Il tuo nome"
                 />
               </div>
@@ -187,7 +195,7 @@ export function MultiStepRegistration({ onBack }: MultiStepRegistrationProps) {
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                  className="mt-1 h-12 border-0 bg-muted/50 focus:bg-card transition-smooth"
+                  className="mt-1 h-11 md:h-12 border-0 bg-muted/50 focus:bg-card transition-smooth"
                   placeholder="Il tuo cognome"
                 />
               </div>
@@ -332,7 +340,7 @@ export function MultiStepRegistration({ onBack }: MultiStepRegistrationProps) {
           <Button 
             onClick={handleNext}
             disabled={!canProceed() || loading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold rounded-xl shadow-card transition-bounce hover:scale-[1.02] active:scale-95 mt-6"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 md:h-12 text-base font-semibold rounded-xl shadow-card transition-bounce hover:scale-[1.02] active:scale-95 mt-6 touch-manipulation"
           >
             {currentStep === steps.length - 1 ? (
               loading ? "Creazione account..." : "Crea Account"
