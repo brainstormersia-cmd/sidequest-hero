@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import BottomNavigation from "./components/ui/bottom-navigation";
 import { AuthProvider } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Landing from "./pages/Landing";
 import OnboardingWrapper from "./pages/OnboardingWrapper";
 import CommunityDashboard from "./pages/CommunityDashboard";
@@ -15,6 +16,7 @@ import Wallet from "./pages/Wallet";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import CreateMission from "./pages/CreateMission";
+import DebugAuth from "./pages/DebugAuth";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -112,6 +114,7 @@ const AppContent = () => {
             </ProtectedRoute>
           )}
         />
+        <Route path="/debug/auth" element={<DebugAuth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideBottomNav && <BottomNavigation />}
@@ -126,7 +129,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppContent />
+          <ErrorBoundary>
+            <AppContent />
+          </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

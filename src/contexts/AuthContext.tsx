@@ -79,11 +79,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, nextSession) => {
+      (_event, nextSession) => {
         if (!isMounted) return;
         setSession(nextSession);
         setUser(nextSession?.user ?? null);
-        await loadProfile(nextSession);
+        // Defer profile loading to avoid deadlock
+        setTimeout(() => {
+          loadProfile(nextSession);
+        }, 0);
         setLoading(false);
       }
     );
@@ -153,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) {
       const missingUserError: PostgrestError = {
+        name: 'PostgrestError',
         message: 'No user found',
         code: 'P0001',
         details: null,

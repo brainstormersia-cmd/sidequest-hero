@@ -358,10 +358,7 @@ const CreateMission = () => {
                 <h3 className="font-semibold text-foreground">Anteprima della tua missione</h3>
               </div>
               
-              <PreviewCard mission={{
-                ...mission,
-                price: parseFloat(mission.price) || 0
-              }} />
+              <PreviewCard mission={mission} />
             </div>
           </div>
         )}

@@ -14,22 +14,25 @@ const OnboardingWrapper = () => {
   useEffect(() => {
     if (loading) return;
 
-    // If user is not authenticated, redirect to landing
+    // If user is not authenticated, redirect to login
     if (!user) {
       navigate('/login?next=%2Fonboarding');
       return;
     }
 
-    if (profile?.onboarding_completed) {
+    // Check localStorage for onboarding completion
+    const onboardingCompleted = localStorage.getItem('sidequest_onboarding_completed') === 'true';
+    
+    if (onboardingCompleted) {
       navigate('/dashboard');
     } else {
       setShowOnboarding(true);
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md space-y-4">
           <Skeleton className="h-12 w-12 rounded-xl mx-auto" />
           <Skeleton className="h-8 w-3/4 mx-auto" />
@@ -45,17 +48,9 @@ const OnboardingWrapper = () => {
   }
 
   const handleComplete = async () => {
-    const { error } = await updateProfile({ onboarding_completed: true });
-
-    if (error) {
-      toast({
-        title: "Aggiornamento profilo non riuscito",
-        description: "Riprova più tardi a completare l'onboarding.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Set onboarding completion in localStorage
+    localStorage.setItem('sidequest_onboarding_completed', 'true');
+    
     setShowOnboarding(false);
     navigate('/dashboard');
   };

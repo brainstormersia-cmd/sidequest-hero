@@ -361,7 +361,7 @@ const MissionDetails = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate(`/profile/${mission.profiles.first_name?.toLowerCase()}-${mission.profiles.last_name?.toLowerCase()}`)}
+              onClick={() => navigate('/profile')}
             >
               <User className="w-4 h-4 mr-2" />
               Profilo
