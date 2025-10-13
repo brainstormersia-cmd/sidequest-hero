@@ -104,6 +104,8 @@ const MissionCard = ({
   const { toast } = useToast();
   const IconComponent = categoryIcons[category];
 
+  const handleNavigate = () => navigate(`/missions/${id}`);
+
   return (
     <Card className="mission-card">
       <div className="flex items-start gap-3 mb-3">

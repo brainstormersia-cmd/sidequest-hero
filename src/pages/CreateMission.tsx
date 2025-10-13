@@ -19,17 +19,6 @@ interface DraftMission {
   description: string;
   category: string;
   duration: string;
-  location: string;
-  price: string;
-  latitude?: number | null;
-  longitude?: number | null;
-}
-
-interface DraftMission {
-  title: string;
-  description: string;
-  category: string;
-  duration: string;
   address: {
     label: string;
     street: string;
@@ -112,10 +101,8 @@ const CreateMission = () => {
     description: "",
     category: "",
     duration: "",
-    location: "",
-    price: "",
-    latitude: null,
-    longitude: null
+    address: null,
+    price: ""
   });
   const [locationQuery, setLocationQuery] = useState("");
   const [isLocationFocused, setIsLocationFocused] = useState(false);
@@ -132,9 +119,17 @@ const CreateMission = () => {
   const handleSelectLocation = (suggestion: MapboxSuggestion) => {
     setMission((prev) => ({
       ...prev,
-      location: suggestion.placeName,
-      latitude: Number.isFinite(suggestion.latitude) ? suggestion.latitude : prev.latitude ?? null,
-      longitude: Number.isFinite(suggestion.longitude) ? suggestion.longitude : prev.longitude ?? null,
+      address: {
+        label: suggestion.placeName,
+        street: suggestion.primaryText || "",
+        number: "",
+        city: "",
+        province: "",
+        postal_code: "",
+        country: "Italia",
+        lat: Number.isFinite(suggestion.latitude) ? suggestion.latitude : null,
+        lon: Number.isFinite(suggestion.longitude) ? suggestion.longitude : null,
+      }
     }));
     setLocationQuery(suggestion.placeName);
     setIsLocationFocused(false);
@@ -410,12 +405,12 @@ const CreateMission = () => {
                     onChange={(e) => {
                       const value = e.target.value;
                       setLocationQuery(value);
-                      setMission({
-                        ...mission,
-                        location: value,
-                        latitude: null,
-                        longitude: null,
-                      });
+                      if (!value) {
+                        setMission({
+                          ...mission,
+                          address: null
+                        });
+                      }
                     }}
                     onFocus={() => {
                       if (blurTimeout.current) {

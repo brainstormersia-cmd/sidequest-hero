@@ -9,7 +9,7 @@ import {
   TrendingUp,
   Users
 } from 'lucide-react';
-import type { PostgrestChangesPayload } from '@supabase/supabase-js';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -120,15 +120,16 @@ export const LiveActivityFeed = () => {
         event: 'INSERT',
         schema: 'public',
         table: 'missions'
-      }, (payload: PostgrestChangesPayload<Record<string, unknown>>) => {
+      }, (payload: RealtimePostgresChangesPayload<Record<string, unknown>>) => {
         const generatedId =
           globalThis.crypto?.randomUUID?.() ?? `activity-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const rec = payload.new as Record<string, unknown>;
         const newActivity: ActivityEvent = {
-          id: String(payload.new?.id ?? generatedId),
+          id: String(rec?.id ?? generatedId),
           type: 'mission_created',
-          title: `Nuova missione: ${String(payload.new?.title ?? 'Missione SideQuest')}`,
-          description: `€${payload.new?.price ?? '—'} disponibili`,
-          amount: typeof payload.new?.price === 'number' ? payload.new.price : undefined,
+          title: `Nuova missione: ${String(rec?.title ?? 'Missione SideQuest')}`,
+          description: `€${rec?.price ?? '—'} disponibili`,
+          amount: typeof rec?.price === 'number' ? rec.price : undefined,
           timestamp: 'Proprio ora',
           user: {
             name: 'Nuovo utente'

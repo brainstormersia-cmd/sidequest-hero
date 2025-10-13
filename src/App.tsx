@@ -29,6 +29,7 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
+  const { isOpen } = useSidebar();
   const hideBottomNav =
     location.pathname === "/" ||
     location.pathname === "/onboarding" ||
