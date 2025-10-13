@@ -122,7 +122,7 @@ const MissionDetails = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching mission:', error);
@@ -290,42 +290,42 @@ const MissionDetails = () => {
     <div className="min-h-screen bg-background pb-6">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full"
+              className="rounded-full min-h-[44px] min-w-[44px] touch-manipulation"
               onClick={() => navigate("/missions")}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-xl font-bold text-foreground">Dettagli missione</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">Dettagli missione</h1>
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-6 space-y-6">
+      <div className="px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Hero Section */}
-        <Card className="p-6 bg-gradient-card border-0 shadow-card">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">{mission.mission_categories?.icon || '⭐'}</span>
+        <Card className="p-4 sm:p-6 bg-gradient-card border-0 shadow-card">
+          <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-xl sm:text-2xl">{mission.mission_categories?.icon || '⭐'}</span>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-xl font-bold text-foreground">{mission.title}</h1>
-                <Badge className={`status-badge ${statusConfig.className}`}>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-2 mb-1 sm:mb-2">
+                <h1 className="text-base sm:text-xl font-bold text-foreground flex-1 line-clamp-2">{mission.title}</h1>
+                <Badge className={`status-badge ${statusConfig.className} flex-shrink-0 text-xs`}>
                   {statusConfig.label}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{mission.mission_categories?.name}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{mission.mission_categories?.name}</p>
             </div>
           </div>
           
-          <div className="text-center py-4 border-t border-border/50">
-            <span className="text-3xl font-bold text-foreground">€{mission.price}</span>
-            <p className="text-sm text-muted-foreground">
+          <div className="text-center py-3 sm:py-4 border-t border-border/50">
+            <span className="text-2xl sm:text-3xl font-bold text-foreground">€{mission.price}</span>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {mission.duration_hours ? `~${mission.duration_hours}h di lavoro` : 'Durata da concordare'}
             </p>
           </div>
@@ -435,7 +435,7 @@ const MissionDetails = () => {
             <>
               <Button
                 onClick={handleAcceptMission}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-semibold shadow-card transition-bounce hover:scale-[1.02]"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-card transition-bounce hover:scale-[1.02] touch-manipulation"
               >
                 Accetta missione
               </Button>
