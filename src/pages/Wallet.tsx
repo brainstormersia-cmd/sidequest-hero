@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle, TrendingUp, Target } from "lucide-react";
+import { ArrowLeft, Plus, ArrowUpRight, ArrowDownRight, Wallet as WalletIcon, CreditCard, Clock, CheckCircle, TrendingUp, Target, Smartphone, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatedCounter } from "@/components/AnimatedCounter";
 import { EarningsChart } from "@/components/EarningsChart";
 import { CategoryBreakdown } from "@/components/CategoryBreakdown";
 import { MilestoneProgress } from "@/components/MilestoneProgress";
 import { mockEarningsHistory, mockCategoryStats } from "@/lib/mockData";
+import walletRechargeImg from "@/assets/wallet-recharge.png";
 
 const TransactionItem = ({ 
   title, 
@@ -70,6 +71,7 @@ const Wallet = () => {
   const [pendingBalance] = useState(45.00);
   const [rechargeAmount, setRechargeAmount] = useState("");
   const [isRechargeOpen, setIsRechargeOpen] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"card" | "mobile" | "bank">("card");
 
   const transactions = [
     {
@@ -133,8 +135,10 @@ const Wallet = () => {
     }
   };
 
+  const quickAmounts = [10, 25, 50, 100];
+
   return (
-    <div className="min-h-screen bg-background pb-6">
+    <div className="min-h-screen bg-background lg:ml-64 pb-6">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="px-6 py-4">
@@ -155,19 +159,17 @@ const Wallet = () => {
       <div className="px-6 py-6 space-y-6">
         {/* Balance Card */}
         <Card className="p-8 bg-gradient-hero border-0 shadow-floating text-secondary-foreground relative overflow-hidden">
-          <div className="absolute inset-0 bg-primary/5 animate-pulse"></div>
           <div className="text-center relative z-10">
             <div className="flex items-center justify-center gap-2 mb-3">
               <WalletIcon className="w-7 h-7" />
               <span className="text-base font-bold opacity-90">Saldo disponibile</span>
             </div>
-            <div className="text-5xl font-black mb-6 animate-celebration">
+            <div className="text-5xl font-black mb-6">
               <AnimatedCounter 
                 value={balance} 
                 prefix="€"
                 decimals={2}
-                duration={1200}
-                celebration={balance > 100}
+                duration={800}
               />
             </div>
             
@@ -182,7 +184,7 @@ const Wallet = () => {
                     value={pendingBalance} 
                     prefix="€"
                     decimals={2}
-                    duration={1000}
+                    duration={800}
                   />
                 </p>
                 <p className="text-xs opacity-90 font-medium mt-1">Disponibile tra 2 giorni 🎉</p>
@@ -192,19 +194,49 @@ const Wallet = () => {
             <Dialog open={isRechargeOpen} onOpenChange={setIsRechargeOpen}>
               <DialogTrigger asChild>
                 <Button
-                  className="bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90 shadow-card transition-bounce hover:scale-105"
+                  size="lg"
+                  className="bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90 shadow-elegant hover:shadow-floating transition-all hover:scale-105 font-semibold"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Ricarica
+                  <Plus className="w-5 h-5 mr-2" />
+                  Ricarica Wallet
                 </Button>
               </DialogTrigger>
-              <DialogContent className="mx-6 rounded-2xl">
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-center">Ricarica Wallet</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold text-center">Ricarica Wallet</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleRecharge} className="space-y-4">
+                
+                {/* Illustration */}
+                <div className="relative w-full h-40 rounded-xl overflow-hidden mb-4">
+                  <img 
+                    src={walletRechargeImg} 
+                    alt="Wallet" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                <form onSubmit={handleRecharge} className="space-y-6">
+                  {/* Quick Amounts */}
                   <div>
-                    <Label htmlFor="amount">Importo (€10 - €500)</Label>
+                    <Label className="text-sm font-semibold mb-3 block">Importi rapidi</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {quickAmounts.map((amount) => (
+                        <Button
+                          key={amount}
+                          type="button"
+                          variant="outline"
+                          className="h-12 font-semibold"
+                          onClick={() => setRechargeAmount(amount.toString())}
+                        >
+                          €{amount}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Custom Amount */}
+                  <div>
+                    <Label htmlFor="amount" className="text-sm font-semibold">Importo personalizzato</Label>
                     <Input
                       id="amount"
                       type="number"
@@ -213,22 +245,79 @@ const Wallet = () => {
                       step="0.01"
                       value={rechargeAmount}
                       onChange={(e) => setRechargeAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="mt-1"
+                      placeholder="Inserisci importo (€10 - €500)"
+                      className="mt-2 h-12"
                     />
                   </div>
                   
-                  <div className="flex items-center gap-3 p-3 border border-border rounded-xl">
-                    <CreditCard className="w-5 h-5 text-muted-foreground" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Carta di credito</p>
-                      <p className="text-xs text-muted-foreground">****1234</p>
+                  {/* Payment Methods */}
+                  <div>
+                    <Label className="text-sm font-semibold mb-3 block">Metodo di pagamento</Label>
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPaymentMethod("card")}
+                        className={`w-full flex items-center gap-3 p-4 border rounded-xl transition-smooth ${
+                          selectedPaymentMethod === "card" 
+                            ? "border-primary bg-primary/5" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <CreditCard className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium">Carta di Credito</p>
+                          <p className="text-xs text-muted-foreground">Visa ****1234</p>
+                        </div>
+                        {selectedPaymentMethod === "card" && (
+                          <CheckCircle className="w-5 h-5 text-primary" />
+                        )}
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPaymentMethod("mobile")}
+                        className={`w-full flex items-center gap-3 p-4 border rounded-xl transition-smooth ${
+                          selectedPaymentMethod === "mobile" 
+                            ? "border-primary bg-primary/5" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <Smartphone className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium">Apple / Google Pay</p>
+                          <p className="text-xs text-muted-foreground">Pagamento rapido</p>
+                        </div>
+                        {selectedPaymentMethod === "mobile" && (
+                          <CheckCircle className="w-5 h-5 text-primary" />
+                        )}
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPaymentMethod("bank")}
+                        className={`w-full flex items-center gap-3 p-4 border rounded-xl transition-smooth ${
+                          selectedPaymentMethod === "bank" 
+                            ? "border-primary bg-primary/5" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <Building2 className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium">Bonifico Bancario</p>
+                          <p className="text-xs text-muted-foreground">2-3 giorni lavorativi</p>
+                        </div>
+                        {selectedPaymentMethod === "bank" && (
+                          <CheckCircle className="w-5 h-5 text-primary" />
+                        )}
+                      </button>
                     </div>
-                    <CheckCircle className="w-5 h-5 text-success" />
                   </div>
                   
-                  <Button type="submit" className="w-full">
-                    Conferma ricarica
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base"
+                  >
+                    Conferma Ricarica
                   </Button>
                 </form>
               </DialogContent>

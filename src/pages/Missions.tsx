@@ -311,7 +311,7 @@ const Missions = () => {
   }, [usingFallback, toast]);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background lg:ml-64 pb-20">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="px-6 py-4">
           <div className="flex items-center gap-3 mb-4">

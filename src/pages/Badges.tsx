@@ -125,6 +125,15 @@ const Badges = () => {
   const unlockedBadges = allBadges?.filter(b => isUnlocked(b.id)) || [];
   const lockedBadges = allBadges?.filter(b => !isUnlocked(b.id)) || [];
 
+  const recentlyUnlocked = unlockedBadges.slice(-3).reverse();
+  const nextToUnlock = lockedBadges
+    .map(badge => ({
+      ...badge,
+      progress: getProgress(badge)
+    }))
+    .sort((a, b) => b.progress - a.progress)
+    .slice(0, 3);
+
   return (
     <div className="min-h-screen bg-background lg:ml-64">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
@@ -142,36 +151,86 @@ const Badges = () => {
       </div>
 
       <div className="px-6 py-6 pb-24 max-w-6xl mx-auto space-y-8">
-        {/* Unlocked Badges */}
-        {unlockedBadges.length > 0 && (
+        {/* Recently Unlocked - Celebratory Section */}
+        {recentlyUnlocked.length > 0 && (
+          <section className="animate-fade-in">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-secondary/10 to-success/10 p-8 border-2 border-primary/20">
+              <div className="absolute top-0 right-0 text-9xl opacity-10">🎉</div>
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span className="text-4xl animate-bounce">🏆</span>
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Sbloccati di Recente!
+                </span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {recentlyUnlocked.map((badge) => {
+                  const achievement = userAchievements?.find(ua => ua.badge_id === badge.id);
+                  return (
+                    <Card 
+                      key={badge.id} 
+                      className="p-6 bg-card border-primary/30 shadow-elegant hover:scale-105 transition-bounce"
+                    >
+                      <div className="text-center">
+                        <div className="text-6xl mb-3 animate-bounce">{badge.icon}</div>
+                        <h3 className="font-bold text-lg mb-2">{badge.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {badge.description}
+                        </p>
+                        {achievement && (
+                          <Badge className="bg-success/10 text-success border-success/20">
+                            {new Date(achievement.unlocked_at).toLocaleDateString('it-IT')}
+                          </Badge>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Next Goals - Motivational Section */}
+        {nextToUnlock.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <span className="text-primary">🏆</span>
-              Sbloccati ({unlockedBadges.length})
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <span>Prossimi Obiettivi</span>
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {unlockedBadges.map((badge) => {
-                const achievement = userAchievements?.find(ua => ua.badge_id === badge.id);
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {nextToUnlock.map((badge) => {
                 return (
                   <Card 
                     key={badge.id} 
-                    className="p-6 bg-gradient-to-br from-card to-muted/50 border-primary/20"
+                    className="p-6 bg-gradient-to-br from-card to-muted/30 border-border hover:border-primary/50 transition-smooth group"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="text-5xl">{badge.icon}</div>
+                      <div className="text-5xl grayscale group-hover:grayscale-0 transition-all">
+                        {badge.icon}
+                      </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{badge.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <h3 className="font-bold text-base mb-1">{badge.name}</h3>
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
                           {badge.description}
                         </p>
-                        <Badge className={categoryColors[badge.category] || 'bg-gray-500'}>
-                          {badge.category}
-                        </Badge>
-                        {achievement && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Sbloccato il {new Date(achievement.unlocked_at).toLocaleDateString('it-IT')}
-                          </p>
-                        )}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs font-semibold">
+                            <span className="text-muted-foreground">Progresso</span>
+                            <span className="text-primary">{Math.round(badge.progress)}%</span>
+                          </div>
+                          <Progress value={badge.progress} className="h-2.5 bg-muted" />
+                          <Badge 
+                            variant="outline" 
+                            className="mt-2 text-xs"
+                          >
+                            {badge.requirement_type === 'missions_count' && 
+                              `${profile?.missions_completed || 0}/${badge.requirement_value} missioni`}
+                            {badge.requirement_type === 'earnings_total' && 
+                              `€${profile?.total_earnings || 0}/€${badge.requirement_value}`}
+                            {badge.requirement_type === 'rating_min' && 
+                              `Rating: ${(profile?.rating_average || 0).toFixed(1)}/5.0`}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -181,47 +240,55 @@ const Badges = () => {
           </section>
         )}
 
-        {/* Locked Badges */}
+        {/* All Unlocked Badges */}
+        {unlockedBadges.length > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-primary" />
+              Tutti i Badge Sbloccati ({unlockedBadges.length})
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {unlockedBadges.map((badge) => {
+                return (
+                  <Card 
+                    key={badge.id} 
+                    className="p-4 bg-card border-primary/10 hover:border-primary/30 transition-smooth text-center group"
+                  >
+                    <div className="text-4xl mb-2 group-hover:scale-110 transition-transform">
+                      {badge.icon}
+                    </div>
+                    <h3 className="font-semibold text-xs line-clamp-1">{badge.name}</h3>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* All Locked Badges */}
         {lockedBadges.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Lock className="w-5 h-5 text-muted-foreground" />
               Da Sbloccare ({lockedBadges.length})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {lockedBadges.map((badge) => {
                 const progress = getProgress(badge);
                 return (
                   <Card 
                     key={badge.id} 
-                    className="p-6 opacity-60 hover:opacity-80 transition-smooth"
+                    className="p-4 bg-muted/30 border-border/50 opacity-60 hover:opacity-100 transition-smooth text-center"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="text-5xl grayscale">{badge.icon}</div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg mb-1">{badge.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {badge.description}
-                        </p>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span>Progresso</span>
-                            <span>{Math.round(progress)}%</span>
-                          </div>
-                          <Progress value={progress} className="h-2" />
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className="mt-3"
-                        >
-                          {badge.requirement_type === 'missions_count' && 
-                            `${profile?.missions_completed || 0}/${badge.requirement_value} missioni`}
-                          {badge.requirement_type === 'earnings_total' && 
-                            `€${profile?.total_earnings || 0}/€${badge.requirement_value}`}
-                          {badge.requirement_type === 'rating_min' && 
-                            `Rating: ${(profile?.rating_average || 0).toFixed(1)}/5.0`}
-                        </Badge>
-                      </div>
+                    <div className="text-4xl mb-2 grayscale">
+                      {badge.icon}
+                    </div>
+                    <h3 className="font-semibold text-xs line-clamp-1 mb-1">{badge.name}</h3>
+                    <div className="w-full bg-muted rounded-full h-1.5">
+                      <div 
+                        className="bg-primary h-1.5 rounded-full transition-all" 
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
                   </Card>
                 );

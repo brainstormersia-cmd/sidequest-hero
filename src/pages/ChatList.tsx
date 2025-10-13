@@ -41,7 +41,7 @@ const ChatList = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="min-h-screen bg-background lg:ml-64 p-6">
         <div className="max-w-2xl mx-auto space-y-4">
           <Skeleton className="h-12 w-48" />
           {[1, 2, 3].map((i) => (
