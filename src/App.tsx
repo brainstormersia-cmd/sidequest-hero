@@ -16,27 +16,102 @@ import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import CreateMission from "./pages/CreateMission";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import RoleGuard from "./routes/RoleGuard";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
-  const hideBottomNav = location.pathname === "/" || location.pathname === "/onboarding" || location.pathname.startsWith("/chat");
+  const hideBottomNav =
+    location.pathname === "/" ||
+    location.pathname === "/onboarding" ||
+    location.pathname.startsWith("/chat") ||
+    location.pathname === "/login";
   
   return (
     <>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/onboarding" element={<OnboardingWrapper />} />
-        <Route path="/dashboard" element={<CommunityDashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/onboarding"
+          element={(
+            <ProtectedRoute>
+              <OnboardingWrapper />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/dashboard"
+          element={(
+            <ProtectedRoute allowGuest>
+              <CommunityDashboard />
+            </ProtectedRoute>
+          )}
+        />
         <Route path="/missions" element={<Missions />} />
-        <Route path="/missions/:id" element={<MissionDetails />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/chat/:id" element={<Chat />} />
-        <Route path="/wallet" element={<Wallet />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/create-mission" element={<CreateMission />} />
+        <Route
+          path="/missions/:id"
+          element={(
+            <ProtectedRoute allowGuest>
+              <MissionDetails />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/chat"
+          element={(
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/chat/:id"
+          element={(
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/wallet"
+          element={(
+            <ProtectedRoute>
+              <RoleGuard allowed={["worker", "employer", "admin"]}>
+                <Wallet />
+              </RoleGuard>
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/profile"
+          element={(
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/notifications"
+          element={(
+            <ProtectedRoute>
+              <Notifications />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/create-mission"
+          element={(
+            <ProtectedRoute>
+              <RoleGuard allowed={["worker", "employer", "admin"]}>
+                <CreateMission />
+              </RoleGuard>
+            </ProtectedRoute>
+          )}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideBottomNav && <BottomNavigation />}

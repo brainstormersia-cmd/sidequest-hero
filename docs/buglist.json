@@ -1,0 +1,138 @@
+[
+  {
+    "id": "BUG-001",
+    "title": "Azione 'Modifica profilo' porta a 404",
+    "description": "Il bottone Modifica profilo nella pagina /profile reindirizza a /profile/edit, ma nessuna route o pagina esiste per gestire il percorso, causando un 404 immediato.",
+    "steps_to_reproduce": [
+      "Autenticarsi ed aprire /profile",
+      "Fare clic su Modifica profilo"
+    ],
+    "expected_result": "L'utente dovrebbe aprire un form di modifica profilo o un modal nel contesto esistente.",
+    "actual_result": "Router naviga verso /profile/edit che non è definito, mostrando la pagina NotFound.",
+    "severity": "Media",
+    "priority": "P1",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/Profile.tsx"],
+    "proposed_fix": "Implementare la route /profile/edit oppure sostituire la navigazione con un modal inline." 
+  },
+  {
+    "id": "BUG-002",
+    "title": "Gestione missione inesistente",
+    "description": "Il pulsante Gestisci missione visibile al proprietario in /missions/:id porta a /missions/{id}/manage, route non definita.",
+    "steps_to_reproduce": [
+      "Aprire /missions/:id come proprietario",
+      "Cliccare Gestisci missione"
+    ],
+    "expected_result": "Visualizzazione della dashboard di gestione missione con stato, runner e pulsanti operativi.",
+    "actual_result": "Redirect verso /missions/{id}/manage con 404.",
+    "severity": "Alta",
+    "priority": "P1",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/MissionDetails.tsx"],
+    "proposed_fix": "Aggiungere una pagina /missions/:id/manage oppure disabilitare il CTA finché la funzionalità non esiste." 
+  },
+  {
+    "id": "BUG-003",
+    "title": "Link al profilo dalla chat produce 404",
+    "description": "Dalla pagina chat il pulsante profilo costruisce un URL /profile/{slug} che non è gestito dal router.",
+    "steps_to_reproduce": [
+      "Aprire /chat o /chat/:id",
+      "Premere l'icona profilo nella top bar"
+    ],
+    "expected_result": "Vedere il profilo pubblico del contatto.",
+    "actual_result": "Viene mostrata la pagina 404.",
+    "severity": "Media",
+    "priority": "P1",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/Chat.tsx"],
+    "proposed_fix": "Introdurre route pubbliche per i profili oppure rimuovere il collegamento fino a quando non disponibile." 
+  },
+  {
+    "id": "BUG-004",
+    "title": "Elenco missioni statico",
+    "description": "La pagina /missions mostra sempre un array hard-coded di missioni e ignora i dati Supabase, quindi filtri/ricerca non riflettono lo stato reale.",
+    "steps_to_reproduce": [
+      "Aprire /missions",
+      "Osservare che le card non cambiano se si modificano i dati in Supabase"
+    ],
+    "expected_result": "Le missioni dovrebbero arrivare dal database con filtri, paginazione e stato.",
+    "actual_result": "Le stesse 5 missioni demo sono sempre visibili.",
+    "severity": "Alta",
+    "priority": "P0",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/Missions.tsx"],
+    "proposed_fix": "Sostituire i mock con query Supabase/React Query e collegare i filtri ai parametri della query." 
+  },
+  {
+    "id": "BUG-005",
+    "title": "Flow onboarding spezzato dopo signup",
+    "description": "Dopo la registrazione la navigazione porta a /onboarding, ma la pagina Onboarding richiede un nuovo login mock. Se l'utente non è ancora autenticato (email non confermata) viene reindirizzato al landing e perde il contesto.",
+    "steps_to_reproduce": [
+      "Registrarsi dalla landing",
+      "Al termine si viene indirizzati a /onboarding",
+      "Se la sessione non è attiva o scade si torna a / e i dati onboarding non vengono salvati"
+    ],
+    "expected_result": "Onboarding guidato che utilizza i dati del nuovo account senza richiedere login manuale.",
+    "actual_result": "L'utente è costretto a reinserire email/password e può essere espulso dalla route se l'auth non è pronta.",
+    "severity": "Alta",
+    "priority": "P0",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/Onboarding.tsx","src/pages/OnboardingWrapper.tsx"],
+    "proposed_fix": "Convertire Onboarding in flow autenticato che legge il profilo da Supabase e rimuovere il login mock." 
+  },
+  {
+    "id": "BUG-006",
+    "title": "CTA 'Accedi' nelle card missione apre semplicemente la stessa pagina",
+    "description": "Da /missions/:id per utenti guest il pulsante Accedi o Registrati porta alla landing senza preservare il riferimento alla missione originale.",
+    "steps_to_reproduce": [
+      "Aprire /missions/:id come utente non loggato",
+      "Premere Accedi o Registrati"
+    ],
+    "expected_result": "Dopo l'autenticazione l'utente dovrebbe tornare alla missione specifica.",
+    "actual_result": "Si perde il contesto e l'utente deve ritrovare la missione manualmente.",
+    "severity": "Media",
+    "priority": "P2",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/pages/MissionDetails.tsx"],
+    "proposed_fix": "Salvare l'ID missione nel redirect state/params e riprendere il flusso post login." 
+  },
+  {
+    "id": "BUG-007",
+    "title": "Linting bloccante su TypeScript",
+    "description": "npm run lint fallisce a causa di tipi any e require vietati (AuthContext, CreateMission, tailwind.config).",
+    "steps_to_reproduce": [
+      "Eseguire npm run lint"
+    ],
+    "expected_result": "Lint passa senza errori.",
+    "actual_result": "Il comando termina con 8 errori e 10 warning.",
+    "severity": "Media",
+    "priority": "P1",
+    "environment": "dev",
+    "logs": ["/tmp/lint.log"],
+    "affected_files": ["src/contexts/AuthContext.tsx","src/pages/CreateMission.tsx","tailwind.config.ts"],
+    "proposed_fix": "Tipizzare correttamente le funzioni, estrarre costanti fuori dai componenti e sostituire require con import." 
+  },
+  {
+    "id": "BUG-008",
+    "title": "Navbar mobile sempre attiva su desktop",
+    "description": "La bottom navigation pensata per mobile resta visibile anche in layout desktop large, sovrapponendosi al contenuto.",
+    "steps_to_reproduce": [
+      "Aprire /dashboard su schermo >= 1024px",
+      "Scrollare fino al footer"
+    ],
+    "expected_result": "Su desktop dovrebbe apparire una navigazione top/side oppure la bottom bar dovrebbe scomparire.",
+    "actual_result": "La bottom bar rimane fissata e non c'è alternativa desktop.",
+    "severity": "Media",
+    "priority": "P2",
+    "environment": "dev",
+    "logs": [],
+    "affected_files": ["src/components/ui/bottom-navigation.tsx"],
+    "proposed_fix": "Applicare breakpoint Tailwind (hidden lg:flex) e introdurre una nav desktop coerente." 
+  }
+]

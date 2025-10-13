@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { FirstTimeOnboarding } from "@/components/FirstTimeOnboarding";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const OnboardingWrapper = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, profile, updateProfile, loading } = useAuth();
+  const { toast } = useToast();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -14,19 +16,16 @@ const OnboardingWrapper = () => {
 
     // If user is not authenticated, redirect to landing
     if (!user) {
-      navigate('/');
+      navigate('/login?next=%2Fonboarding');
       return;
     }
 
-    // Check if user has completed onboarding
-    const hasCompletedOnboarding = localStorage.getItem('sidequest_onboarding_completed');
-    
-    if (hasCompletedOnboarding) {
+    if (profile?.onboarding_completed) {
       navigate('/dashboard');
     } else {
       setShowOnboarding(true);
     }
-  }, [user, loading, navigate]);
+  }, [user, profile, loading, navigate]);
 
   if (loading) {
     return (
@@ -45,15 +44,25 @@ const OnboardingWrapper = () => {
     return null;
   }
 
-  const handleComplete = () => {
-    localStorage.setItem('sidequest_onboarding_completed', 'true');
+  const handleComplete = async () => {
+    const { error } = await updateProfile({ onboarding_completed: true });
+
+    if (error) {
+      toast({
+        title: "Aggiornamento profilo non riuscito",
+        description: "Riprova più tardi a completare l'onboarding.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setShowOnboarding(false);
     navigate('/dashboard');
   };
 
   return (
-    <FirstTimeOnboarding 
-      onComplete={handleComplete} 
+    <FirstTimeOnboarding
+      onComplete={handleComplete}
     />
   );
 };

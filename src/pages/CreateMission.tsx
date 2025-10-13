@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,8 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Euro, Eye, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useMapboxAutocomplete, type MapboxSuggestion } from "@/hooks/use-mapbox-autocomplete";
+
+interface DraftMission {
+  title: string;
+  description: string;
+  category: string;
+  duration: string;
+  location: string;
+  price: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
 
 const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
   <div className="flex items-center justify-center gap-2 mb-6">
@@ -22,7 +34,7 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
   </div>
 );
 
-const PreviewCard = ({ mission }: { mission: any }) => (
+const PreviewCard = ({ mission }: { mission: DraftMission }) => (
   <Card className="mission-card">
     <div className="flex items-start gap-3 mb-3">
       <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -70,14 +82,38 @@ const CreateMission = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
-  const [mission, setMission] = useState({
+  const [mission, setMission] = useState<DraftMission>({
     title: "",
     description: "",
     category: "",
     duration: "",
     location: "",
-    price: ""
+    price: "",
+    latitude: null,
+    longitude: null
   });
+  const [locationQuery, setLocationQuery] = useState("");
+  const [isLocationFocused, setIsLocationFocused] = useState(false);
+  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const trimmedLocationQuery = locationQuery.trim();
+  const { suggestions, isLoading: isLoadingSuggestions, error: locationError } = useMapboxAutocomplete(
+    trimmedLocationQuery,
+    {
+      enabled: currentStep === 3 && trimmedLocationQuery.length >= 3,
+    }
+  );
+
+  const handleSelectLocation = (suggestion: MapboxSuggestion) => {
+    setMission((prev) => ({
+      ...prev,
+      location: suggestion.placeName,
+      latitude: Number.isFinite(suggestion.latitude) ? suggestion.latitude : prev.latitude ?? null,
+      longitude: Number.isFinite(suggestion.longitude) ? suggestion.longitude : prev.longitude ?? null,
+    }));
+    setLocationQuery(suggestion.placeName);
+    setIsLocationFocused(false);
+  };
 
   const categories = [
     { value: "delivery", label: "Consegne", icon: "🚛" },
@@ -272,11 +308,81 @@ const CreateMission = () => {
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="location"
-                    value={mission.location}
-                    onChange={(e) => setMission({ ...mission, location: e.target.value })}
+                    value={locationQuery}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setLocationQuery(value);
+                      setMission({
+                        ...mission,
+                        location: value,
+                        latitude: null,
+                        longitude: null,
+                      });
+                    }}
+                    onFocus={() => {
+                      if (blurTimeout.current) {
+                        clearTimeout(blurTimeout.current);
+                        blurTimeout.current = null;
+                      }
+                      setIsLocationFocused(true);
+                    }}
+                    onBlur={() => {
+                      blurTimeout.current = setTimeout(() => {
+                        setIsLocationFocused(false);
+                      }, 120);
+                    }}
                     placeholder="es. Centro città, Via Roma 15"
                     className="mt-1 pl-10"
                   />
+                  {(isLocationFocused || trimmedLocationQuery.length >= 3) && (
+                    <div className="absolute top-full mt-2 w-full rounded-xl border border-border bg-popover shadow-lg">
+                      {locationError && (
+                        <p className="px-4 py-3 text-sm text-destructive">{locationError}</p>
+                      )}
+                      {!locationError && isLoadingSuggestions && (
+                        <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Caricamento suggerimenti...</span>
+                        </div>
+                      )}
+                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length < 3 && (
+                        <p className="px-4 py-3 text-sm text-muted-foreground">
+                          Digita almeno 3 caratteri per vedere i suggerimenti.
+                        </p>
+                      )}
+                      {!locationError && !isLoadingSuggestions && trimmedLocationQuery.length >= 3 && suggestions.length === 0 && (
+                        <p className="px-4 py-3 text-sm text-muted-foreground">
+                          Nessun risultato trovato. Prova a essere più specifico.
+                        </p>
+                      )}
+                      {!locationError && suggestions.length > 0 && (
+                        <ul className="max-h-64 overflow-y-auto py-1">
+                          {suggestions.map((suggestion) => (
+                            <li key={suggestion.id}>
+                              <button
+                                type="button"
+                                className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-muted/60 focus:bg-muted/80 focus:outline-none"
+                                onMouseDown={(event) => {
+                                  event.preventDefault();
+                                  handleSelectLocation(suggestion);
+                                }}
+                              >
+                                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                                <span className="text-sm text-foreground">
+                                  {suggestion.primaryText}
+                                  {suggestion.secondaryText && (
+                                    <span className="block text-xs text-muted-foreground">
+                                      {suggestion.secondaryText}
+                                    </span>
+                                  )}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               

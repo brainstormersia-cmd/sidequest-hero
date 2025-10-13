@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Briefcase, 
+import {
+  Briefcase,
   CheckCircle, 
   DollarSign, 
   Star, 
   TrendingUp,
   Users
 } from 'lucide-react';
+import type { PostgrestChangesPayload } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -26,19 +26,43 @@ interface ActivityEvent {
   };
 }
 
+const fallbackActivities: ActivityEvent[] = [
+  {
+    id: 'fallback-1',
+    type: 'mission_created',
+    title: 'Nuova missione: Passeggiata cani',
+    description: '€35 disponibili nel quartiere Navigli',
+    amount: 35,
+    timestamp: '5m fa',
+    user: { name: 'Giulia R.' }
+  },
+  {
+    id: 'fallback-2',
+    type: 'mission_completed',
+    title: 'Missione completata',
+    description: 'Luca ha consegnato tre pacchi in centro',
+    amount: 28,
+    timestamp: '12m fa',
+    user: { name: 'Luca F.' }
+  },
+  {
+    id: 'fallback-3',
+    type: 'earnings',
+    title: 'Guadagno registrato',
+    description: 'Marta ha guadagnato €42 per assistenza spesa',
+    amount: 42,
+    timestamp: '23m fa',
+    user: { name: 'Marta N.' }
+  }
+];
+
 export const LiveActivityFeed = () => {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
-    fetchInitialActivities();
-    setupRealtimeSubscription();
-  }, []);
-
-  const fetchInitialActivities = async () => {
+  const fetchInitialActivities = useCallback(async (): Promise<ActivityEvent[]> => {
     try {
-      // Fetch recent missions
-      const { data: missionsData } = await supabase
+      const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
           id,
@@ -52,15 +76,19 @@ export const LiveActivityFeed = () => {
         .order('created_at', { ascending: false })
         .limit(10);
 
+      if (error) {
+        throw error;
+      }
+
       const mockActivities: ActivityEvent[] = missionsData?.slice(0, 5).map((mission, index) => {
         const types: ActivityEvent['type'][] = ['mission_created', 'mission_completed', 'earnings'];
         const type = types[index % 3];
-        
+
         return {
           id: mission.id + '-' + index,
           type,
-          title: type === 'mission_created' 
-            ? `Nuova missione: ${mission.title}` 
+          title: type === 'mission_created'
+            ? `Nuova missione: ${mission.title}`
             : type === 'mission_completed'
             ? `Missione completata`
             : `Guadagno registrato`,
@@ -78,40 +106,67 @@ export const LiveActivityFeed = () => {
         };
       }) || [];
 
-      setActivities(mockActivities);
+      return mockActivities.length ? mockActivities : fallbackActivities;
     } catch (error) {
       console.error('Error fetching activities:', error);
+      return fallbackActivities;
     }
-  };
+  }, []);
 
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscription = useCallback((onInsert: (activity: ActivityEvent) => void) => {
     const channel = supabase
       .channel('activity-feed')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'missions'
-      }, (payload: any) => {
+      }, (payload: PostgrestChangesPayload<Record<string, unknown>>) => {
+        const generatedId =
+          globalThis.crypto?.randomUUID?.() ?? `activity-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const newActivity: ActivityEvent = {
-          id: payload.new.id,
+          id: String(payload.new?.id ?? generatedId),
           type: 'mission_created',
-          title: `Nuova missione: ${payload.new.title}`,
-          description: `€${payload.new.price} disponibili`,
-          amount: payload.new.price,
+          title: `Nuova missione: ${String(payload.new?.title ?? 'Missione SideQuest')}`,
+          description: `€${payload.new?.price ?? '—'} disponibili`,
+          amount: typeof payload.new?.price === 'number' ? payload.new.price : undefined,
           timestamp: 'Proprio ora',
           user: {
             name: 'Nuovo utente'
           }
         };
-        
-        setActivities(prev => [newActivity, ...prev.slice(0, 19)]);
+
+        onInsert(newActivity);
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadActivities = async () => {
+      const initialActivities = await fetchInitialActivities();
+      if (isMounted) {
+        setActivities(initialActivities);
+      }
+    };
+
+    const teardown = setupRealtimeSubscription((activity) => {
+      if (isMounted) {
+        setActivities((prev) => [activity, ...prev.slice(0, 19)]);
+      }
+    });
+
+    loadActivities();
+
+    return () => {
+      isMounted = false;
+      teardown();
+    };
+  }, [fetchInitialActivities, setupRealtimeSubscription]);
 
   const getRelativeTime = (date: Date): string => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);

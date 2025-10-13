@@ -8,12 +8,14 @@ import { ArrowLeft, ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import sidequestLogo from "@/assets/sidequest-logo.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginFormProps {
   onBack: () => void;
+  nextPath?: string | null;
 }
 
-export function LoginForm({ onBack }: LoginFormProps) {
+export function LoginForm({ onBack, nextPath }: LoginFormProps) {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const { toast } = useToast();
@@ -45,21 +47,49 @@ export function LoginForm({ onBack }: LoginFormProps) {
         description: error.message,
         variant: "destructive",
       });
-      } else {
-        toast({
-          title: "Benvenuto!",
-          description: "Login effettuato con successo",
-        });
-        
-        // Smart redirect based on onboarding status
-        const hasCompletedOnboarding = localStorage.getItem('sidequest_onboarding_completed');
-        if (!hasCompletedOnboarding) {
-          navigate('/onboarding');
-        } else {
-          navigate('/dashboard');
-        }
-      }
       setLoading(false);
+      return;
+    }
+
+    try {
+      toast({
+        title: "Benvenuto!",
+        description: "Login effettuato con successo",
+      });
+
+      if (nextPath) {
+        navigate(nextPath, { replace: true });
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user.id;
+
+      if (!userId) {
+        navigate('/dashboard');
+        return;
+      }
+
+      const { data: profileRow, error: profileError } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching profile after login', profileError);
+        navigate('/dashboard');
+        return;
+      }
+
+      if (profileRow?.onboarding_completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

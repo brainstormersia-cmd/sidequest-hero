@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight, Search, DollarSign, Briefcase, Eye } from "lucide-react";
 import sidequestLogo from "@/assets/sidequest-logo.jpg";
 import { MultiStepRegistration } from "@/components/MultiStepRegistration";
-import { LoginForm } from "@/components/LoginForm";
 import { useAuth } from "@/contexts/AuthContext";
 
 const FeatureCard = ({ 
@@ -32,27 +31,22 @@ const FeatureCard = ({
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const [activeFlow, setActiveFlow] = useState<'landing' | 'register' | 'login' | 'explore'>('landing');
+  const { user, loading, profile } = useAuth();
+  const [activeFlow, setActiveFlow] = useState<'landing' | 'register' | 'explore'>('landing');
 
   // Auto-redirect if already logged in
   useEffect(() => {
-    if (user && !loading && activeFlow === 'landing') {
-      const hasCompletedOnboarding = localStorage.getItem('sidequest_onboarding_completed');
-      if (hasCompletedOnboarding) {
+    if (!loading && user && activeFlow === 'landing') {
+      if (profile?.onboarding_completed) {
         navigate('/dashboard');
       } else {
         navigate('/onboarding');
       }
     }
-  }, [user, loading, activeFlow, navigate]);
+  }, [user, loading, profile, activeFlow, navigate]);
 
   if (activeFlow === 'register') {
     return <MultiStepRegistration onBack={() => setActiveFlow('landing')} />;
-  }
-
-  if (activeFlow === 'login') {
-    return <LoginForm onBack={() => setActiveFlow('landing')} />;
   }
 
   if (activeFlow === 'explore') {
@@ -120,8 +114,8 @@ const Landing = () => {
             <ArrowRight className="w-5 h-5 md:w-6 md:h-6 ml-2" />
           </Button>
           
-          <Button 
-            onClick={() => setActiveFlow('login')}
+          <Button
+            onClick={() => navigate('/login')}
             variant="outline"
             className="w-full border-3 md:border-4 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background h-12 md:h-14 text-base md:text-lg font-bold rounded-xl md:rounded-2xl transition-all hover:scale-[1.02] active:scale-95 touch-manipulation"
           >
