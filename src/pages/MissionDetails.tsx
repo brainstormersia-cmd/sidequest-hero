@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -84,16 +84,7 @@ const MissionDetails = () => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<"runner" | "owner" | "guest">("guest");
 
-  useEffect(() => {
-    if (!id) {
-      navigate('/missions');
-      return;
-    }
-    
-    fetchMissionDetails();
-  }, [id, navigate]);
-
-  const fetchMissionDetails = async () => {
+  const fetchMissionDetails = useCallback(async () => {
     try {
       const { data: missionData, error } = await supabase
         .from('missions')
@@ -157,7 +148,16 @@ const MissionDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate, toast, user]);
+
+  useEffect(() => {
+    if (!id) {
+      navigate('/missions');
+      return;
+    }
+
+    fetchMissionDetails();
+  }, [fetchMissionDetails, id, navigate]);
 
   const handleAcceptMission = async () => {
     if (!user || !mission) return;
@@ -462,7 +462,10 @@ const MissionDetails = () => {
             <div className="grid grid-cols-1 gap-3">
               <Button
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-11"
-                onClick={() => navigate(`/missions/${mission.id}/manage`)}
+                onClick={() => toast({
+                  title: "Gestione missione in arrivo",
+                  description: "Stiamo ultimando il pannello di gestione per i creator.",
+                })}
               >
                 Gestisci missione
               </Button>

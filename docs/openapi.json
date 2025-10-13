@@ -1,0 +1,332 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SideQuest API",
+    "version": "0.1.0",
+    "description": "Draft OpenAPI contract describing the REST surface required by the SideQuest marketplace frontend."
+  },
+  "servers": [
+    { "url": "https://api.sidequest.local/v1" }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Session and profile bootstrap" },
+    { "name": "Missions", "description": "Marketplace mission lifecycle" },
+    { "name": "Profiles", "description": "Public profile and leaderboard data" },
+    { "name": "Notifications", "description": "Inbox and realtime updates" },
+    { "name": "Payments", "description": "Wallet, escrow and payouts" }
+  ],
+  "paths": {
+    "/auth/session": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get the active session",
+        "responses": {
+          "200": {
+            "description": "Current session context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "401": { "description": "No active session" }
+        }
+      }
+    },
+    "/missions": {
+      "get": {
+        "tags": ["Missions"],
+        "summary": "List missions",
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "$ref": "#/components/schemas/MissionStatus" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string", "format": "uuid" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100 }, "default": 20 }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated missions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Mission" }
+                    },
+                    "nextCursor": { "type": "string", "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Missions"],
+        "summary": "Create a mission",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/MissionInput" } }
+          }
+        },
+        "responses": {
+          "201": { "description": "Mission created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mission" } } } },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Unauthenticated" }
+        }
+      }
+    },
+    "/missions/{id}": {
+      "get": {
+        "tags": ["Missions"],
+        "summary": "Retrieve mission detail",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Mission detail", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mission" } } } },
+          "404": { "description": "Mission not found" }
+        }
+      },
+      "patch": {
+        "tags": ["Missions"],
+        "summary": "Update mission",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/MissionUpdate" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Mission updated" },
+          "403": { "description": "Forbidden" },
+          "404": { "description": "Mission not found" }
+        }
+      }
+    },
+    "/missions/{id}/accept": {
+      "post": {
+        "tags": ["Missions"],
+        "summary": "Accept mission",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Mission accepted" },
+          "409": { "description": "Mission already claimed" }
+        }
+      }
+    },
+    "/profiles/top": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Leaderboard snapshot",
+        "responses": {
+          "200": {
+            "description": "Top performers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ProfileSummary" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "tags": ["Notifications"],
+        "security": [{ "bearerAuth": [] }],
+        "summary": "List notifications",
+        "parameters": [
+          { "name": "unread", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "User notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Notification" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/{id}": {
+      "patch": {
+        "tags": ["Notifications"],
+        "security": [{ "bearerAuth": [] }],
+        "summary": "Mark notification as read",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "is_read": { "type": "boolean" }
+                },
+                "required": ["is_read"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Updated" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/wallet/balance": {
+      "get": {
+        "tags": ["Payments"],
+        "security": [{ "bearerAuth": [] }],
+        "summary": "Retrieve wallet balances",
+        "responses": {
+          "200": {
+            "description": "Wallet snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": { "type": "number", "format": "float" },
+                    "pending": { "type": "number", "format": "float" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Session": {
+        "type": "object",
+        "properties": {
+          "user": { "$ref": "#/components/schemas/Profile" },
+          "token": { "type": "string" }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "avatar_url": { "type": "string", "format": "uri", "nullable": true },
+          "location": { "type": "string", "nullable": true },
+          "rating_average": { "type": "number", "format": "float", "nullable": true },
+          "missions_completed": { "type": "integer" },
+          "missions_created": { "type": "integer" },
+          "total_earnings": { "type": "number", "format": "float" }
+        }
+      },
+      "ProfileSummary": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Profile" },
+          {
+            "type": "object",
+            "properties": {
+              "rank": { "type": "integer" }
+            }
+          }
+        ]
+      },
+      "Mission": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number", "format": "float" },
+          "location": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/MissionStatus" },
+          "duration_hours": { "type": "integer", "nullable": true },
+          "category": { "$ref": "#/components/schemas/MissionCategory" },
+          "owner": { "$ref": "#/components/schemas/ProfileSummary" },
+          "runner": { "$ref": "#/components/schemas/ProfileSummary", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id","title","description","price","location","status","category","owner","created_at"]
+      },
+      "MissionInput": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number", "format": "float", "minimum": 5 },
+          "location": { "type": "string" },
+          "duration_hours": { "type": "integer", "minimum": 1, "nullable": true },
+          "category_id": { "type": "string", "format": "uuid" },
+          "deadline": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["title","description","price","location","category_id"]
+      },
+      "MissionUpdate": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/MissionStatus" },
+          "runner_id": { "type": "string", "format": "uuid", "nullable": true },
+          "price": { "type": "number", "format": "float" },
+          "deadline": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "MissionStatus": {
+        "type": "string",
+        "enum": ["open","in_progress","pending_completion","completed","cancelled"]
+      },
+      "MissionCategory": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "icon": { "type": "string" },
+          "color": { "type": "string" }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "type": { "type": "string" },
+          "is_read": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

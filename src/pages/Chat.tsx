@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Paperclip, MapPin, Star, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: number;
@@ -27,6 +28,7 @@ const ChatBubble = ({ message, isOwn }: { message: Message; isOwn: boolean }) =>
 const Chat = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -130,7 +132,10 @@ const Chat = () => {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              onClick={() => navigate(`/profile/${contact.name.toLowerCase().replace(" ", "-")}`)}
+              onClick={() => toast({
+                title: "Profilo in arrivo",
+                description: "Presto potrai aprire i profili direttamente dalla chat.",
+              })}
             >
               <User className="w-5 h-5" />
             </Button>

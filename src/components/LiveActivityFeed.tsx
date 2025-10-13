@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Briefcase, 
+import {
+  Briefcase,
   CheckCircle, 
   DollarSign, 
   Star, 
   TrendingUp,
   Users
 } from 'lucide-react';
+import type { PostgrestChangesPayload } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -59,31 +60,7 @@ export const LiveActivityFeed = () => {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadActivities = async () => {
-      const initialActivities = await fetchInitialActivities();
-      if (isMounted) {
-        setActivities(initialActivities);
-      }
-    };
-
-    const teardown = setupRealtimeSubscription((activity) => {
-      if (isMounted) {
-        setActivities((prev) => [activity, ...prev.slice(0, 19)]);
-      }
-    });
-
-    loadActivities();
-
-    return () => {
-      isMounted = false;
-      teardown();
-    };
-  }, []);
-
-  const fetchInitialActivities = async (): Promise<ActivityEvent[]> => {
+  const fetchInitialActivities = useCallback(async (): Promise<ActivityEvent[]> => {
     try {
       const { data: missionsData, error } = await supabase
         .from('missions')
@@ -134,22 +111,24 @@ export const LiveActivityFeed = () => {
       console.error('Error fetching activities:', error);
       return fallbackActivities;
     }
-  };
+  }, []);
 
-  const setupRealtimeSubscription = (onInsert: (activity: ActivityEvent) => void) => {
+  const setupRealtimeSubscription = useCallback((onInsert: (activity: ActivityEvent) => void) => {
     const channel = supabase
       .channel('activity-feed')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'missions'
-      }, (payload: any) => {
+      }, (payload: PostgrestChangesPayload<Record<string, unknown>>) => {
+        const generatedId =
+          globalThis.crypto?.randomUUID?.() ?? `activity-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         const newActivity: ActivityEvent = {
-          id: payload.new.id,
+          id: String(payload.new?.id ?? generatedId),
           type: 'mission_created',
-          title: `Nuova missione: ${payload.new.title}`,
-          description: `€${payload.new.price} disponibili`,
-          amount: payload.new.price,
+          title: `Nuova missione: ${String(payload.new?.title ?? 'Missione SideQuest')}`,
+          description: `€${payload.new?.price ?? '—'} disponibili`,
+          amount: typeof payload.new?.price === 'number' ? payload.new.price : undefined,
           timestamp: 'Proprio ora',
           user: {
             name: 'Nuovo utente'
@@ -163,7 +142,31 @@ export const LiveActivityFeed = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadActivities = async () => {
+      const initialActivities = await fetchInitialActivities();
+      if (isMounted) {
+        setActivities(initialActivities);
+      }
+    };
+
+    const teardown = setupRealtimeSubscription((activity) => {
+      if (isMounted) {
+        setActivities((prev) => [activity, ...prev.slice(0, 19)]);
+      }
+    });
+
+    loadActivities();
+
+    return () => {
+      isMounted = false;
+      teardown();
+    };
+  }, [fetchInitialActivities, setupRealtimeSubscription]);
 
   const getRelativeTime = (date: Date): string => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);

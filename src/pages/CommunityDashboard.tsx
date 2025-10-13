@@ -269,17 +269,6 @@ const CommunityDashboard = () => {
   }, []);
 
   // Redirect if not authenticated and not in guest mode
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (!isGuest && !user) {
-      navigate('/');
-      return;
-    }
-
-    fetchDashboardData();
-  }, [user, authLoading, navigate, isGuest, fetchDashboardData]);
-
   const applyFallbackData = useCallback(() => {
     if (!isMountedRef.current) return;
 
@@ -426,6 +415,17 @@ const CommunityDashboard = () => {
       }
     }
   }, [applyFallbackData, isGuest, toast, user]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!isGuest && !user) {
+      navigate('/');
+      return;
+    }
+
+    fetchDashboardData();
+  }, [user, authLoading, navigate, isGuest, fetchDashboardData]);
 
   const quickActions = isGuest ? [
     {
