@@ -220,7 +220,10 @@ const Profile = () => {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              onClick={() => navigate("/profile/edit")}
+              onClick={() => toast({
+                title: "Funzione in arrivo",
+                description: "La modifica del profilo sarà disponibile a breve.",
+              })}
             >
               <Edit className="w-5 h-5" />
             </Button>
@@ -346,7 +349,10 @@ const Profile = () => {
           <Button
             variant="outline"
             className="w-full h-12 text-base"
-            onClick={() => navigate("/profile/edit")}
+            onClick={() => toast({
+              title: "Funzione in arrivo",
+              description: "Presto potrai modificare il tuo profilo da qui.",
+            })}
           >
             <Edit className="w-5 h-5 mr-2" />
             Modifica profilo

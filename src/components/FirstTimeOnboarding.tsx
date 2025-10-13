@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft, Users, Shield, Star, Zap } from "lucide-react";
@@ -37,15 +36,11 @@ interface FirstTimeOnboardingProps {
 }
 
 export function FirstTimeOnboarding({ onComplete }: FirstTimeOnboardingProps) {
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
 
   const handleNext = () => {
     if (currentStep === onboardingSteps.length - 1) {
-      // Mark onboarding as completed and navigate to dashboard
-      localStorage.setItem('sidequest_onboarding_completed', 'true');
       onComplete();
-      navigate('/dashboard');
     } else {
       setCurrentStep(prev => prev + 1);
     }
@@ -58,9 +53,7 @@ export function FirstTimeOnboarding({ onComplete }: FirstTimeOnboardingProps) {
   };
 
   const handleSkip = () => {
-    localStorage.setItem('sidequest_onboarding_completed', 'true');
     onComplete();
-    navigate('/dashboard');
   };
 
   const step = onboardingSteps[currentStep];

@@ -9,6 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+interface DraftMission {
+  title: string;
+  description: string;
+  category: string;
+  duration: string;
+  location: string;
+  price: string;
+}
+
 const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
   <div className="flex items-center justify-center gap-2 mb-6">
     {[...Array(totalSteps)].map((_, index) => (
@@ -22,7 +31,7 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
   </div>
 );
 
-const PreviewCard = ({ mission }: { mission: any }) => (
+const PreviewCard = ({ mission }: { mission: DraftMission }) => (
   <Card className="mission-card">
     <div className="flex items-start gap-3 mb-3">
       <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -70,7 +79,7 @@ const CreateMission = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
-  const [mission, setMission] = useState({
+  const [mission, setMission] = useState<DraftMission>({
     title: "",
     description: "",
     category: "",

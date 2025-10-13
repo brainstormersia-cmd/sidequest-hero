@@ -1,5 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { Session, User } from '@supabase/supabase-js';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import {
+  type AuthError,
+  type PostgrestError,
+  type Session,
+  type User
+} from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Profile {
@@ -17,6 +22,9 @@ interface Profile {
   missions_completed: number;
   missions_created: number;
   is_verified: boolean;
+  account_type?: 'worker' | 'employer' | 'admin';
+  onboarding_completed?: boolean;
+  skills?: string[] | null;
 }
 
 interface AuthContextType {
@@ -24,10 +32,16 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ error: PostgrestError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,56 +52,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadProfile = useCallback(async (nextSession: Session | null) => {
+    if (!nextSession?.user) {
+      setProfile(null);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', nextSession.user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error loading profile', error);
+      setProfile(null);
+      return;
+    }
+
+    if (data) {
+      setProfile(data as Profile);
+    }
+  }, []);
+
   useEffect(() => {
-    // Set up auth state listener
+    let isMounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Fetch profile data when user logs in
-        if (session?.user) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single();
-          
-          setProfile(profileData);
-        } else {
-          setProfile(null);
-        }
-        
+      async (_event, nextSession) => {
+        if (!isMounted) return;
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
+        await loadProfile(nextSession);
         setLoading(false);
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-          .then(({ data: profileData }) => {
-            setProfile(profileData);
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!isMounted) {
+        return;
       }
+
+      setSession(data.session);
+      setUser(data.session?.user ?? null);
+      await loadProfile(data.session);
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [loadProfile]);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
+    const redirectUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/`
+      : undefined;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -99,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
-    
+
     return { error };
   };
 
@@ -108,7 +130,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password
     });
-    
+
+    return { error };
+  };
+
+  const resetPassword = async (email: string) => {
+    const redirectUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/reset-password`
+      : undefined;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+
     return { error };
   };
 
@@ -117,17 +151,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return { error: new Error('No user found') };
-    
+    if (!user) {
+      const missingUserError: PostgrestError = {
+        message: 'No user found',
+        code: 'P0001',
+        details: null,
+        hint: null
+      };
+      return { error: missingUserError };
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update(updates)
       .eq('user_id', user.id);
-    
+
     if (!error && profile) {
       setProfile({ ...profile, ...updates });
     }
-    
+
     return { error };
   };
 
@@ -138,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp,
     signIn,
+    resetPassword,
     signOut,
     updateProfile
   };
