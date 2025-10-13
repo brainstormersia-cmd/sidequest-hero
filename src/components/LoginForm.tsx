@@ -82,11 +82,8 @@ export function LoginForm({ onBack, nextPath }: LoginFormProps) {
         return;
       }
 
-      if (profileRow?.onboarding_completed) {
-        navigate('/dashboard');
-      } else {
-        navigate('/onboarding');
-      }
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
     } finally {
       setLoading(false);
     }

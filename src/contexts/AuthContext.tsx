@@ -156,7 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         message: 'No user found',
         code: 'P0001',
         details: null,
-        hint: null
+        hint: null,
+        name: 'PostgrestError'
       };
       return { error: missingUserError };
     }
