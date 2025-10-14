@@ -115,7 +115,7 @@ export function BoostShopCard({
       {/* CORPO */}
       <div className="p-6 flex flex-col flex-1">
         <div className="flex-1">
-          <h3 className="text-2xl font-extrabold text-gray-900">{title}</h3>
+          <h3 className="text-2xl font-black text-gray-900">{title}</h3>
           {subtitle ? <p className="text-sm text-gray-500 mt-1">{subtitle}</p> : null}
           {description ? (
             <p className="text-sm text-gray-700 mt-3 leading-snug h-[42px] overflow-hidden">{description}</p>
