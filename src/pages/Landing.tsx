@@ -169,7 +169,7 @@ const Landing = () => {
 
             {/* Featured Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {[products[0], products[2], products[5]].map((product) => (
+              {[products[0], products[1], products[2]].map((product) => (
                 <Card 
                   key={product.id} 
                   className="bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20 p-4 hover:border-primary/40 transition-all cursor-pointer hover:scale-105"
