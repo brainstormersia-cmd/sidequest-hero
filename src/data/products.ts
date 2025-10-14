@@ -67,52 +67,6 @@ export const products: Product[] = [
     ],
     coverUrl: "/images/starter-pack.png",
     imageFit: "contain",
-    headerHeight: 200,
-  },
-  {
-    id: "skip-3",
-    title: "Skip Cooldown 3×",
-    subtitle: "Salta le attese",
-    description: "Evita tempi morti tra una missione e l'altra.",
-    price: "€1,49",
-    badge: "Nuovo",
-    durationLabel: "3 usi",
-    perks: [
-      { label: "Niente attese" }
-    ],
-    coverUrl: "/images/skip-3.png",
-    imageFit: "contain",
-    headerHeight: 180,
-  },
-  {
-    id: "scan-plus",
-    title: "Scan Radius+",
-    subtitle: "Trova missioni più lontane",
-    description: "Estende il raggio di ricerca di +3km per 24h.",
-    price: "€1,29",
-    durationLabel: "24h",
-    perks: [
-      { label: "+3km raggio" }
-    ],
-    coverUrl: "/images/scan-plus.png",
-    imageFit: "cover",
-    headerHeight: 200,
-  },
-  {
-    id: "sidequest-plus",
-    title: "SideQuest+ (Mensile)",
-    subtitle: "Livello Pro",
-    description: "+payout fisso, priorità leggera, pin illimitati, badge pro.",
-    price: "€4,99/mese",
-    badge: "ABBONAMENTO",
-    durationLabel: "Rinnovo mensile",
-    perks: [
-      { label: "+payout fisso" },
-      { label: "Pin illimitati" },
-      { label: "Badge Pro" }
-    ],
-    coverUrl: "/images/sidequest-plus.png",
-    imageFit: "cover",
     headerHeight: 220,
   },
 ];

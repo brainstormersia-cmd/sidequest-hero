@@ -62,7 +62,7 @@ export function BoostShopCard({
   return (
     <div
       className={[
-        "w-[380px] max-w-full rounded-3xl bg-white shadow-2xl border border-gray-100 overflow-hidden hover:scale-[1.01] transition-transform duration-300",
+        "w-[380px] max-w-full h-full flex flex-col rounded-3xl bg-white shadow-2xl border border-gray-100 overflow-hidden hover:scale-[1.01] transition-transform duration-300",
         "focus-within:ring-2 focus-within:ring-black/10",
         className,
       ].join(" ")}
@@ -113,23 +113,25 @@ export function BoostShopCard({
       </div>
 
       {/* CORPO */}
-      <div className="p-6">
-        <h3 className="text-2xl font-extrabold text-gray-900">{title}</h3>
-        {subtitle ? <p className="text-sm text-gray-500 mt-1">{subtitle}</p> : null}
-        {description ? (
-          <p className="text-sm text-gray-700 mt-3 leading-snug">{description}</p>
-        ) : null}
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex-1">
+          <h3 className="text-2xl font-extrabold text-gray-900">{title}</h3>
+          {subtitle ? <p className="text-sm text-gray-500 mt-1">{subtitle}</p> : null}
+          {description ? (
+            <p className="text-sm text-gray-700 mt-3 leading-snug h-[42px] overflow-hidden">{description}</p>
+          ) : null}
 
-        {(price || oldPrice) && (
-          <div className="flex items-end gap-2 mt-4 mb-6">
+          {(price || oldPrice) && (
+            <div className="h-12 flex items-end gap-2 mt-4 mb-6">
             {price ? (
               <span className="text-3xl font-extrabold text-gray-900">{price}</span>
             ) : null}
             {oldPrice ? (
               <span className="text-sm line-through text-gray-400">{oldPrice}</span>
             ) : null}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         <button
           type="button"
@@ -155,7 +157,7 @@ export function BoostShopCard({
         )}
 
         {perks?.length ? (
-          <ul className="mt-4 space-y-1 text-xs text-gray-700">
+          <ul className="mt-4 space-y-1 text-xs text-gray-700 min-h-[60px]">
             {perks.map((p, i) => (
               <li key={i} className="flex items-start gap-2">
                 {p.icon ? <span className="mt-[1px]">{p.icon}</span> : <span>•</span>}
