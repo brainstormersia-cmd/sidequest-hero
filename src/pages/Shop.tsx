@@ -45,26 +45,26 @@ const Shop = () => {
         </div>
 
         {/* Trust Section */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 p-4 rounded-xl border bg-white shadow-sm">
-            <ShieldCheck size={20} className="text-green-600 flex-shrink-0" />
+        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-4xl mx-auto opacity-50">
+          <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200/50 bg-white/30">
+            <ShieldCheck size={14} className="text-gray-400 flex-shrink-0" />
             <div>
-              <div className="font-medium text-sm">Pagamenti sicuri</div>
-              <div className="text-xs text-muted-foreground">Protezione anti-frode</div>
+              <div className="text-xs text-gray-500">Pagamenti sicuri</div>
+              <div className="text-[10px] text-gray-400">Protezione anti-frode</div>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl border bg-white shadow-sm">
-            <Clock size={20} className="text-amber-600 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200/50 bg-white/30">
+            <Clock size={14} className="text-gray-400 flex-shrink-0" />
             <div>
-              <div className="font-medium text-sm">Attivazione immediata</div>
-              <div className="text-xs text-muted-foreground">Il boost parte subito</div>
+              <div className="text-xs text-gray-500">Attivazione immediata</div>
+              <div className="text-[10px] text-gray-400">Il boost parte subito</div>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl border bg-white shadow-sm">
-            <Headphones size={20} className="text-blue-600 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200/50 bg-white/30">
+            <Headphones size={14} className="text-gray-400 flex-shrink-0" />
             <div>
-              <div className="font-medium text-sm">Supporto veloce</div>
-              <div className="text-xs text-muted-foreground">Risposte rapide 7/7</div>
+              <div className="text-xs text-gray-500">Supporto veloce</div>
+              <div className="text-[10px] text-gray-400">Risposte rapide 7/7</div>
             </div>
           </div>
         </div>
