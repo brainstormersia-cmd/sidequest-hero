@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Search, DollarSign, Briefcase, Eye } from "lucide-react";
+import { ArrowRight, Search, DollarSign, Briefcase, Eye, ShoppingBag } from "lucide-react";
 import sidequestLogo from "@/assets/sidequest-logo.jpg";
 import { MultiStepRegistration } from "@/components/MultiStepRegistration";
 import { useAuth } from "@/contexts/AuthContext";
+import { products } from "@/data/products";
 
 const FeatureCard = ({ 
   icon, 
@@ -152,6 +153,64 @@ const Landing = () => {
             title="🚀 Costruisci la tua rep"
             description="Rating verificati · Community di fiducia"
           />
+        </div>
+
+        {/* Shop Hero Section */}
+        <div className="w-full max-w-4xl mt-12 mb-8 animate-fade-in animation-delay-900 px-4">
+          <Card className="bg-card border-2 border-primary/30 p-6 md:p-8 rounded-3xl shadow-elegant">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                ✨ Potenzia la tua esperienza
+              </h2>
+              <p className="text-muted-foreground text-sm md:text-base">
+                Boost, pack esclusivi e abbonamenti per portare il tuo gioco al livello successivo
+              </p>
+            </div>
+
+            {/* Featured Products Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {[products[0], products[2], products[5]].map((product) => (
+                <Card 
+                  key={product.id} 
+                  className="bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20 p-4 hover:border-primary/40 transition-all cursor-pointer hover:scale-105"
+                  onClick={() => navigate('/shop')}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl mb-3 overflow-hidden">
+                    <img 
+                      src={product.coverUrl} 
+                      alt={product.title}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  {product.badge && (
+                    <div className="mb-2">
+                      <span className="px-2 py-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full">
+                        {product.badge}
+                      </span>
+                    </div>
+                  )}
+                  <h3 className="font-bold text-sm text-foreground mb-1">{product.title}</h3>
+                  <p className="text-xs text-muted-foreground mb-2">{product.subtitle}</p>
+                  <p className="text-lg font-black text-primary">{product.price}</p>
+                </Card>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className="text-center">
+              <Button 
+                onClick={() => navigate('/shop')}
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base px-8 shadow-md hover:shadow-lg transition-all"
+              >
+                <ShoppingBag className="w-5 h-5 mr-2" />
+                Vai allo Shop
+              </Button>
+            </div>
+          </Card>
         </div>
 
         {/* Community Stats */}

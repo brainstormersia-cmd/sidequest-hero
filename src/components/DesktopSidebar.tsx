@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Briefcase, Plus, MessageSquare, Wallet, Award, Bell, MapPin, Settings, Menu } from "lucide-react";
+import { Home, Briefcase, Plus, MessageSquare, Wallet, Award, Bell, MapPin, Settings, Menu, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,7 +10,7 @@ import { useSidebar } from "@/contexts/SidebarContext";
 interface NavLinkProps {
   to: string;
   icon: React.ReactNode;
-  label: string;
+  label: string | React.ReactNode;
   primary?: boolean;
   badge?: number;
   size?: "default" | "sm";
@@ -22,10 +22,12 @@ const NavLink = ({ to, icon, label, primary, badge, size = "default", collapsed 
   const isActive = location.pathname === to || 
     (to !== "/dashboard" && location.pathname.startsWith(to));
 
+  const labelText = typeof label === 'string' ? label : '';
+  
   return (
     <Link
       to={to}
-      title={collapsed ? label : undefined}
+      title={collapsed ? labelText : undefined}
       className={cn(
         "flex items-center gap-3 rounded-xl transition-smooth relative",
         size === "sm" ? "px-3 py-2 text-sm" : "px-4 py-3",
@@ -139,6 +141,22 @@ export const DesktopSidebar = () => {
           <NavLink to="/chat" icon={<MessageSquare />} label="Chat" size="sm" collapsed={!isOpen} />
           <NavLink to="/wallet" icon={<Wallet />} label="Portafoglio" size="sm" collapsed={!isOpen} />
           <NavLink to="/badges" icon={<Award />} label="Badge" size="sm" collapsed={!isOpen} />
+          <NavLink 
+            to="/shop" 
+            icon={<ShoppingBag />} 
+            label={
+              !isOpen ? "Shop" : (
+                <span className="flex items-center gap-2">
+                  Shop
+                  <span className="px-2 py-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full whitespace-nowrap">
+                    -20% OGGI
+                  </span>
+                </span>
+              )
+            }
+            size="sm" 
+            collapsed={!isOpen} 
+          />
           <NavLink to="/categories" icon={<MapPin />} label="Categorie" size="sm" collapsed={!isOpen} />
           <NavLink to="/notifications" icon={<Bell />} label="Notifiche" size="sm" collapsed={!isOpen} />
         </div>
