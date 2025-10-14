@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_boosts: {
+        Row: {
+          activated_at: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          purchase_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          purchase_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          purchase_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_boosts_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           category: string | null
@@ -145,49 +189,73 @@ export type Database = {
       missions: {
         Row: {
           category_id: string | null
+          city: string | null
           completed_at: string | null
+          country: string | null
           created_at: string | null
           deadline: string | null
           description: string
           duration_hours: number | null
           id: string
+          lat: number | null
           location: string
+          lon: number | null
           owner_id: string
+          postal_code: string | null
           price: number
+          province: string | null
           runner_id: string | null
           status: string | null
+          street: string | null
+          street_number: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location: string
+          lon?: number | null
           owner_id: string
+          postal_code?: string | null
           price: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
           category_id?: string | null
+          city?: string | null
           completed_at?: string | null
+          country?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
           duration_hours?: number | null
           id?: string
+          lat?: number | null
           location?: string
+          lon?: number | null
           owner_id?: string
+          postal_code?: string | null
           price?: number
+          province?: string | null
           runner_id?: string | null
           status?: string | null
+          street?: string | null
+          street_number?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -277,8 +345,11 @@ export type Database = {
           missions_completed: number | null
           missions_created: number | null
           phone: string | null
+          postal_code: string | null
           rating_average: number | null
           rating_count: number | null
+          street: string | null
+          street_number: string | null
           total_earnings: number | null
           updated_at: string | null
           user_id: string
@@ -296,8 +367,11 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
           user_id: string
@@ -315,10 +389,52 @@ export type Database = {
           missions_completed?: number | null
           missions_created?: number | null
           phone?: string | null
+          postal_code?: string | null
           rating_average?: number | null
           rating_count?: number | null
+          street?: string | null
+          street_number?: string | null
           total_earnings?: number | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json | null
+          product_id: string
+          status: string
+          stripe_payment_intent_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          product_id: string
+          status?: string
+          stripe_payment_intent_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json | null
+          product_id?: string
+          status?: string
+          stripe_payment_intent_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -481,6 +597,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      webhook_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          processed: boolean
+          stripe_event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          processed?: boolean
+          stripe_event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          processed?: boolean
+          stripe_event_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

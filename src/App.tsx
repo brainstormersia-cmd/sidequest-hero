@@ -30,6 +30,8 @@ import UserCatalog from "./pages/UserCatalog";
 import UserProfile from "./pages/UserProfile";
 import Categories from "./pages/Categories";
 import Shop from "./pages/Shop";
+import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +120,8 @@ const AppContent = () => {
         <Route path="/users/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/checkout/success" element={<ProtectedRoute><CheckoutSuccess /></ProtectedRoute>} />
         <Route path="/debug/auth" element={<DebugAuth />} />
         <Route path="*" element={<NotFound />} />
         </Routes>

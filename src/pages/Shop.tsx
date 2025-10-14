@@ -1,9 +1,12 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { products } from "@/data/products";
 import { BoostShopCard } from "@/components/BoostShopCard";
 import { ShieldCheck, Clock, Headphones } from "lucide-react";
 
 const Shop = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     console.log("event: shop_view");
   }, []);
@@ -14,6 +17,7 @@ const Shop = () => {
 
   const handleBuyClick = (id: string, title: string) => {
     console.log("event: shop_buy_click", { id, title });
+    navigate(`/checkout?product=${id}`);
   };
 
   return (
