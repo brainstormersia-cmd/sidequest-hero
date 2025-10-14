@@ -124,10 +124,10 @@ export function BoostShopCard({
           {(price || oldPrice) && (
             <div className="h-12 flex items-end gap-2 mt-4 mb-6">
             {price ? (
-              <span className="text-4xl font-extrabold text-gray-900">{price}</span>
+              <span className="text-3xl font-black text-gray-900">{price}</span>
             ) : null}
             {oldPrice ? (
-              <span className="text-base line-through text-gray-400 font-semibold">{oldPrice}</span>
+              <span className="text-sm line-through text-gray-400">{oldPrice}</span>
             ) : null}
             </div>
           )}
