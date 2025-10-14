@@ -19,7 +19,7 @@ const Shop = () => {
     <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-amber-100 to-white p-6 sm:p-10">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 text-center">
-          🛒 SideQuest Shop
+          SideQuest Shop
         </h1>
         <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
           Potenzia la tua esperienza con boost, pack esclusivi e abbonamenti premium

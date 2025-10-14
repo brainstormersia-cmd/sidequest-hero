@@ -160,7 +160,7 @@ const Landing = () => {
           <Card className="bg-card border-2 border-primary/30 p-6 md:p-8 rounded-3xl shadow-elegant">
             <div className="text-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-                ✨ Potenzia la tua esperienza
+                Potenzia la tua esperienza
               </h2>
               <p className="text-muted-foreground text-sm md:text-base">
                 Boost, pack esclusivi e abbonamenti per portare il tuo gioco al livello successivo

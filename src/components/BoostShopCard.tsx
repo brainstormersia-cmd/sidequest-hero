@@ -123,7 +123,7 @@ export const BoostShopCard = ({
         {/* Duration Label */}
         {durationLabel && (
           <p className="text-xs text-muted-foreground font-medium">
-            ⏱️ {durationLabel}
+            {durationLabel}
           </p>
         )}
 
@@ -151,9 +151,9 @@ export const BoostShopCard = ({
       <CardFooter>
         <Button
           onClick={onBuy}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base h-12 shadow-md hover:shadow-lg transition-all"
+          className="w-full bg-black text-white hover:bg-black/90 font-semibold text-sm h-12 rounded-xl transition-all"
         >
-          🛒 Acquista ora
+          Acquista ora
         </Button>
       </CardFooter>
     </Card>
