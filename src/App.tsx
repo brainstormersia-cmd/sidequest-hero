@@ -39,7 +39,7 @@ const AppContent = () => {
   const location = useLocation();
   const { isOpen } = useSidebar();
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
-  const hideBottomNav = isDesktop || location.pathname === "/" || location.pathname === "/onboarding" || 
+  const hideBottomNav = isDesktop || location.pathname === "/" || location.pathname === "/landing" || location.pathname === "/onboarding" || 
     location.pathname.startsWith("/chat") || location.pathname === "/login";
 
   return (
@@ -51,6 +51,7 @@ const AppContent = () => {
       )}>
         <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/onboarding"
