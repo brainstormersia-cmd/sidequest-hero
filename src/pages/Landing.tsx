@@ -55,18 +55,6 @@ const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user) {
-      const isOnboardingComplete = localStorage.getItem(`onboarding_complete_${user.id}`) === 'true';
-      
-      if (!isOnboardingComplete) {
-        navigate('/onboarding');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [user, navigate]);
-
   return (
     <div className="min-h-screen bg-background">
       {/* HERO SECTION */}
@@ -89,24 +77,37 @@ const Landing = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-              <Button 
-                size="lg" 
-                className="text-lg px-8 hover-scale font-bold group"
-                onClick={() => navigate('/login')}
-              >
-                Inizia ora
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8 hover-scale font-semibold"
-                onClick={() => {
-                  document.getElementById('come-funziona')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Scopri come funziona
-              </Button>
+              {user ? (
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8 hover-scale font-bold group"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Vai alla Dashboard
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="text-lg px-8 hover-scale font-bold group"
+                    onClick={() => navigate('/login')}
+                  >
+                    Inizia ora
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="text-lg px-8 hover-scale font-semibold"
+                    onClick={() => {
+                      document.getElementById('come-funziona')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Scopri come funziona
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Hero visual placeholder */}
