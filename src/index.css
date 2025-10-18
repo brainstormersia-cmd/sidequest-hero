@@ -8,78 +8,159 @@
 
 @layer base {
   :root {
-    /* SideQuest Brand Colors */
-    --background: 210 20% 98%; /* #F9FAFB */
-    --foreground: 220 14% 11%; /* #1C1C1E */
+    /* === DESIGN SYSTEM 2.0 - Token-Driven === */
     
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 220 14% 11%;
+    /* Neutral Backgrounds (Dark-Optimized) */
+    --canvas: 220 40% 7%; /* #0B0F14 */
+    --surface: 220 35% 9%; /* #0F1521 */
+    --elevated: 220 30% 14%; /* #1A1F2E */
+    --overlay: 220 25% 18%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 11%;
+    /* LEGACY: Background/Card tokens (for backward compatibility) */
+    --background: 220 40% 7%;
+    --foreground: 210 40% 98%;
+    --card: 220 35% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 30% 14%;
+    --popover-foreground: 210 40% 98%;
     
-    /* Primary Brand Yellow */
-    --primary: 48 100% 52%; /* #FFD60A */
-    --primary-foreground: 220 14% 11%;
+    /* Primary Brand: Iris Violet #6C5CE7 */
+    --primary: 263 70% 64%;
+    --primary-50: 263 100% 97%;
+    --primary-100: 263 95% 93%;
+    --primary-200: 263 91% 87%;
+    --primary-300: 263 87% 77%;
+    --primary-400: 263 80% 70%;
+    --primary-500: 263 75% 66%;
+    --primary-600: 263 70% 64%;
+    --primary-700: 263 67% 45%;
+    --primary-800: 263 70% 35%;
+    --primary-900: 263 75% 20%;
+    --primary-foreground: 222 47% 11%;
     
-    /* Secondary Petrol Blue */
-    --secondary: 208 100% 20%; /* #003566 */
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary: Cyan #22D3EE */
+    --secondary: 187 85% 53%;
+    --secondary-50: 187 100% 96%;
+    --secondary-500: 187 85% 53%;
+    --secondary-600: 187 85% 43%;
+    --secondary-700: 187 85% 33%;
+    --secondary-foreground: 222 47% 11%;
     
-    --muted: 210 20% 98%;
-    --muted-foreground: 215 13% 50%; /* #6B7280 */
+    /* Accent: Electric Lime #A3E635 */
+    --accent: 84 81% 56%;
+    --accent-500: 84 81% 56%;
+    --accent-600: 84 75% 48%;
+    --accent-foreground: 222 47% 11%;
     
-    --accent: 48 100% 52%;
-    --accent-foreground: 220 14% 11%;
+    /* Muted (legacy support) */
+    --muted: 220 25% 18%;
+    --muted-foreground: 215 14% 62%;
     
-    /* Status Colors */
-    --success: 145 63% 49%; /* #2ECC71 */
-    --success-foreground: 0 0% 100%;
+    /* Text Hierarchy */
+    --text-primary: 210 40% 98%; /* #F8FAFC */
+    --text-secondary: 210 30% 90%; /* #E2E8F0 */
+    --text-muted: 215 14% 62%; /* #94A3B8 */
+    --text-inverted: 222 47% 11%; /* #0F172A */
+    --text-disabled: 215 10% 45%;
     
-    --destructive: 354 70% 54%; /* #E63946 */
-    --destructive-foreground: 0 0% 100%;
+    /* Feedback Colors */
+    --success: 142 71% 35%; /* #16A34A */
+    --success-50: 142 76% 96%;
+    --success-500: 142 71% 35%;
+    --success-600: 142 76% 28%;
+    --success-foreground: 210 40% 98%;
     
-    --warning: 38 92% 50%; /* #F59E0B */
-    --warning-foreground: 220 14% 11%;
+    --warning: 32 95% 51%; /* #F59E0B */
+    --warning-50: 32 100% 96%;
+    --warning-500: 32 95% 51%;
+    --warning-600: 32 100% 45%;
+    --warning-foreground: 222 47% 11%;
     
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 48 100% 52%;
+    --destructive: 0 84% 60%; /* #EF4444 */
+    --destructive-foreground: 210 40% 98%;
     
-    --radius: 12px;
+    --info: 199 89% 39%; /* #0284C7 */
+    --info-50: 199 100% 96%;
+    --info-500: 199 89% 39%;
+    --info-600: 199 95% 32%;
+    --info-foreground: 210 40% 98%;
     
-    /* SideQuest Custom Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-    --gradient-card: linear-gradient(180deg, hsl(var(--card)), hsl(210 20% 96%));
+    /* State Colors */
+    --state-hover: 263 70% 64% / 0.12;
+    --state-selected: 263 70% 64% / 0.16;
+    --state-disabled: 215 14% 62% / 0.4;
+    --state-focus: 263 70% 64% / 0.24;
+    
+    /* Border Tokens */
+    --border: 217 33% 17%; /* #1E293B */
+    --border-default: 217 33% 17%;
+    --border-interactive: 215 25% 27%; /* #334155 */
+    --border-focus: 263 70% 64%;
+    --input: 217 33% 17%;
+    --ring: 263 70% 64%;
+    
+    /* Border Radius */
+    --radius: 0.75rem;
+    --radius-xs: 0.25rem;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-full: 9999px;
+    
+    /* SideQuest Custom Gradients (updated) */
+    --gradient-hero: linear-gradient(135deg, hsl(263 70% 64%), hsl(187 85% 53%));
+    --gradient-card: linear-gradient(180deg, hsl(220 35% 9%), hsl(220 30% 14%));
     
     /* Shadows */
-    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-floating: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.12);
+    --shadow-card: 0 4px 12px rgb(0 0 0 / 0.15);
+    --shadow-floating: 0 10px 40px rgb(0 0 0 / 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
     
-    /* Animation Timings */
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Motion Tokens */
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --duration-instant: 50ms;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
   }
   
   .dark {
-    --background: 220 27% 6%;
+    /* Dark mode già ottimizzato (le stesse variabili funzionano bene) */
+    --canvas: 220 40% 7%;
+    --surface: 220 35% 9%;
+    --elevated: 220 30% 14%;
+    
+    --background: 220 40% 7%;
     --foreground: 210 40% 98%;
-    --card: 220 27% 8%;
+    --card: 220 35% 9%;
     --card-foreground: 210 40% 98%;
-    --popover: 220 27% 8%;
+    --popover: 220 30% 14%;
     --popover-foreground: 210 40% 98%;
-    --primary: 48 100% 52%;
-    --primary-foreground: 220 14% 11%;
-    --secondary: 208 100% 20%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 220 27% 12%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 48 100% 52%;
-    --accent-foreground: 220 14% 11%;
-    --border: 220 27% 12%;
-    --input: 220 27% 12%;
-    --ring: 48 100% 52%;
+    
+    --primary: 263 70% 64%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 187 85% 53%;
+    --secondary-foreground: 222 47% 11%;
+    --accent: 84 81% 56%;
+    --accent-foreground: 222 47% 11%;
+    
+    --muted: 220 25% 18%;
+    --muted-foreground: 215 14% 62%;
+    
+    --text-primary: 210 40% 98%;
+    --text-secondary: 210 30% 90%;
+    --text-muted: 215 14% 62%;
+    
+    --border: 217 33% 17%;
+    --border-default: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 263 70% 64%;
   }
 }
 
@@ -98,16 +179,28 @@
   /* Touch-friendly interactions */
   button, a, [role="button"] {
     touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(255, 214, 10, 0.2);
+    -webkit-tap-highlight-color: hsl(var(--primary) / 0.2);
   }
 
-  /* Ensure minimum tap target size on mobile */
-  @media (hover: none) {
+  /* Ensure minimum tap target size on mobile (iOS HIG: 44px) */
+  @media (hover: none) and (pointer: coarse) {
     button:not(.inline-button), 
     a:not(.inline-link),
     [role="button"] {
       min-height: 44px;
       min-width: 44px;
+    }
+  }
+  
+  /* Accessibility: Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
