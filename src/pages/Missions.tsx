@@ -9,35 +9,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fallbackMissions as rawFallbackMissions } from "@/lib/dashboardFallback";
+import { MissionCardV2 } from "@/components/MissionCardV2";
 import {
   ArrowLeft,
   Search,
-  MapPin,
-  Clock,
-  Star,
-  Truck,
-  Dog,
-  ShoppingCart,
-  Hammer,
-  Users,
   Plus,
-  Sparkles,
-  Boxes
 } from "lucide-react";
 
 const PAGE_SIZE = 6;
 
-const categoryIcons = {
-  delivery: Truck,
-  pet: Dog,
-  shopping: ShoppingCart,
-  handyman: Hammer,
-  cleaning: Sparkles,
-  moving: Boxes,
-  other: Users
-};
-
-type MissionCategoryKey = keyof typeof categoryIcons;
+type MissionCategoryKey = "delivery" | "pet" | "shopping" | "handyman" | "cleaning" | "moving" | "other";
 
 interface MissionQueryRow {
   id: string;
@@ -89,84 +70,7 @@ const formatDuration = (hours: number | null | undefined): string => {
   return `${hours}h+`;
 };
 
-const MissionCard = ({
-  id,
-  title,
-  description,
-  category,
-  location,
-  duration,
-  price,
-  ownerRating,
-  ownerName
-}: MissionListItem) => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const IconComponent = categoryIcons[category];
-
-  const handleNavigate = () => {
-    // Prevent navigation for fallback missions
-    if (id.startsWith('fallback-')) {
-      toast({
-        title: "Missione demo",
-        description: "Questa è una missione di esempio. Crea una missione reale per iniziare!",
-        variant: "default"
-      });
-      return;
-    }
-    navigate(`/missions/${id}`);
-  };
-
-  return (
-    <Card className="mission-card">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-          <IconComponent className="w-5 h-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-foreground text-base line-clamp-1">{title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{description}</p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-        <div className="flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
-          <span>{location}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          <span>{duration}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Star className="w-3 h-3" />
-          <span>{ownerRating.toFixed(1)} • {ownerName}</span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <span className="text-xl font-bold text-foreground">€{price}</span>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-secondary hover:text-secondary/80 px-3"
-            onClick={handleNavigate}
-          >
-            Dettagli
-          </Button>
-          <Button
-            size="sm"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 px-4"
-            onClick={handleNavigate}
-          >
-            Accetta
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
-};
+// MissionCard component removed - using MissionCardV2 instead
 
 const FilterChip = ({
   label,
@@ -393,9 +297,32 @@ const Missions = () => {
             ))}
           </div>
         ) : missionsToDisplay.length ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {missionsToDisplay.map((mission) => (
-              <MissionCard key={mission.id} {...mission} />
+              <MissionCardV2
+                key={mission.id}
+                title={mission.title}
+                description={mission.description}
+                price={mission.price}
+                escrowAmount={mission.price}
+                isKYCVerified={false}
+                rating={mission.ownerRating}
+                reviewCount={0}
+                location={mission.location}
+                deadline={mission.duration}
+                category={mission.category}
+                onAccept={() => {
+                  if (mission.id.startsWith('fallback-')) {
+                    toast({
+                      title: "Missione demo",
+                      description: "Questa è una missione di esempio. Crea una missione reale per iniziare!",
+                      variant: "default"
+                    });
+                    return;
+                  }
+                  navigate(`/missions/${mission.id}`);
+                }}
+              />
             ))}
             {!usingFallback && missionsQuery.hasNextPage && (
               <Button
