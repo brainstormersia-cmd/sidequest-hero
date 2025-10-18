@@ -5,22 +5,40 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-normal ease-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        // Primary: Iris Violet (WCAG AA compliant)
+        default: "bg-primary-600 text-text-inverted hover:bg-primary-700 active:bg-primary-800 shadow-sm",
+        primary: "bg-primary-600 text-text-inverted hover:bg-primary-700 active:bg-primary-800 shadow-sm",
+        
+        // Secondary: Cyan
+        secondary: "bg-secondary-600 text-text-inverted hover:bg-secondary-700 active:bg-secondary shadow-sm",
+        
+        // Accent: Electric Lime
+        accent: "bg-accent-500 text-text-inverted hover:bg-accent-600 active:bg-accent shadow-sm",
+        
+        // Destructive
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive shadow-sm",
+        
+        // Success
+        success: "bg-success-500 text-success-foreground hover:bg-success-600 active:bg-success shadow-sm",
+        
+        // Outline (transparent with border)
+        outline: "border-2 border-border-interactive bg-transparent text-text-primary hover:bg-state-hover active:bg-state-selected",
+        
+        // Ghost (no background until hover)
+        ghost: "text-text-primary hover:bg-state-hover active:bg-state-selected",
+        
+        // Link
+        link: "text-primary-600 underline-offset-4 hover:underline hover:text-primary-700",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        sm: "h-9 px-3 text-sm min-w-[88px]",      // Touch target ≥24px
+        default: "h-11 px-4 text-base min-w-[120px]", // Touch target 44px (iOS HIG)
+        lg: "h-[52px] px-6 text-lg min-w-[140px]",    // Larger touch target
+        icon: "h-11 w-11",                            // Square touch target 44px
       },
     },
     defaultVariants: {
