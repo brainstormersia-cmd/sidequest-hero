@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { fallbackMissions as rawFallbackMissions } from "@/lib/dashboardFallback";
 import { MissionCardV2 } from "@/components/MissionCardV2";
+import { MissionFilters, type FilterValues } from "@/components/missions/MissionFilters";
 import {
   ArrowLeft,
   Search,
@@ -110,6 +111,12 @@ const Missions = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [advancedFilters, setAdvancedFilters] = useState<FilterValues>({
+    priceRange: [0, 500],
+    categories: [],
+    urgent: false,
+    verified: false
+  });
   const fallbackNotifiedRef = useRef(false);
 
   // Realtime subscription for new missions
@@ -275,15 +282,21 @@ const Missions = () => {
       </div>
 
       <div className="px-6 py-6 space-y-6">
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {filters.map((filter) => (
-            <FilterChip
-              key={filter.id}
-              label={filter.label}
-              active={activeFilter === filter.id}
-              onClick={() => setActiveFilter(filter.id)}
-            />
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-2 flex-1">
+            {filters.map((filter) => (
+              <FilterChip
+                key={filter.id}
+                label={filter.label}
+                active={activeFilter === filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+              />
+            ))}
+          </div>
+          <MissionFilters
+            filters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
+          />
         </div>
 
         {usingFallback && (

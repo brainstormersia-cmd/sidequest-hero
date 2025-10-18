@@ -90,68 +90,40 @@ export const EscrowWidget = ({
   const StatusIcon = config.icon;
 
   return (
-    <Card
+    <div
       className={cn(
-        "p-4 transition-smooth hover:shadow-elegant",
+        "flex items-center gap-2 p-3 rounded-lg border transition-smooth",
         config.bgColor,
         config.borderColor,
         className
       )}
     >
-      <div className="flex items-start gap-3">
-        <div className={cn(
-          "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-          config.bgColor
-        )}>
-          <StatusIcon className={cn("w-5 h-5", config.textColor)} />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <div>
-              <Badge variant="outline" className={cn("text-xs mb-2", config.textColor)}>
-                {config.label}
-              </Badge>
-              <p className="text-2xl font-bold text-text-primary">
-                €{amount.toFixed(2)}
-              </p>
-            </div>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full"
-                    onClick={onLearnMore}
-                  >
-                    <Info className="w-4 h-4 text-text-muted" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Come funziona l'escrow?</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-
-          <p className="text-xs text-text-muted leading-relaxed">
-            {config.description}
-          </p>
-
-          {daysUntilAutoRelease && status === "pending_release" && (
-            <div className="mt-3 pt-3 border-t border-border-default">
-              <p className="text-xs text-text-muted">
-                <span className="font-medium text-text-primary">
-                  Rilascio automatico
-                </span>
-                {" "}tra {daysUntilAutoRelease} {daysUntilAutoRelease === 1 ? "giorno" : "giorni"}
-              </p>
-            </div>
-          )}
-        </div>
+      <StatusIcon className={cn("w-4 h-4 flex-shrink-0", config.textColor)} />
+      
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-text-muted">{config.description}</p>
+        <p className="text-sm font-semibold text-text-primary">
+          €{amount.toFixed(2)}
+        </p>
       </div>
-    </Card>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full flex-shrink-0"
+              onClick={onLearnMore}
+            >
+              <Info className="w-3.5 h-3.5 text-text-muted" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            <p className="text-xs">Come funziona l'escrow?</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 };

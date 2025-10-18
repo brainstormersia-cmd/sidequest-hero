@@ -10,8 +10,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, MapPin, Clock, Euro, Eye } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { MissionCardV2 } from "@/components/MissionCardV2";
+import { ArrowLeft, MapPin, Clock, Euro, Eye, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface DraftMission {
   title: string;
@@ -22,60 +25,66 @@ interface DraftMission {
   price: string;
 }
 
-const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
-  <div className="flex items-center justify-center gap-2 mb-6">
-    {[...Array(totalSteps)].map((_, index) => (
-      <div
-        key={index}
-        className={`w-3 h-3 rounded-full transition-smooth ${
-          index < currentStep ? "bg-primary" : "bg-muted"
-        }`}
-      />
-    ))}
-  </div>
-);
+const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
+  const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  
+  return (
+    <div className="mb-8">
+      <Progress value={progress} className="h-2 mb-4" />
+      <div className="flex justify-between">
+        {[...Array(totalSteps)].map((_, index) => {
+          const stepNum = index + 1;
+          const isCompleted = stepNum < currentStep;
+          const isCurrent = stepNum === currentStep;
+          
+          return (
+            <div key={index} className="flex flex-col items-center gap-2">
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-smooth",
+                isCompleted && "bg-success-500 text-white",
+                isCurrent && "bg-brand-primary text-white ring-4 ring-brand-primary/20",
+                !isCompleted && !isCurrent && "bg-surface border-2 border-border-default text-text-muted"
+              )}>
+                {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : stepNum}
+              </div>
+              <span className={cn(
+                "text-xs font-medium",
+                (isCompleted || isCurrent) ? "text-text-primary" : "text-text-muted"
+              )}>
+                {stepNum === 1 ? "Info" : stepNum === 2 ? "Dettagli" : stepNum === 3 ? "Luogo" : "Conferma"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
-const PreviewCard = ({ mission }: { mission: DraftMission }) => (
-  <Card className="mission-card">
-    <div className="flex items-start gap-3 mb-3">
-      <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-        <span className="text-primary font-semibold">
-          {mission.category === "delivery" ? "🚛" : 
-           mission.category === "pet" ? "🐕" : 
-           mission.category === "shopping" ? "🛒" : 
-           mission.category === "handyman" ? "🔨" : "👥"}
-        </span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-foreground text-base line-clamp-1">{mission.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{mission.description}</p>
-      </div>
-    </div>
-    
-    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-      <div className="flex items-center gap-1">
-        <MapPin className="w-3 h-3" />
-        <span>{mission.location}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <Clock className="w-3 h-3" />
-        <span>{mission.duration}</span>
-      </div>
-    </div>
-    
-    <div className="flex items-center justify-between">
-      <span className="text-xl font-bold text-foreground">€{mission.price}</span>
-      <div className="flex gap-2">
-        <Button variant="ghost" size="sm" className="text-secondary">
-          Dettagli
-        </Button>
-        <Button size="sm" className="bg-primary text-primary-foreground">
-          Accetta
-        </Button>
-      </div>
-    </div>
-  </Card>
-);
+const PreviewCard = ({ mission }: { mission: DraftMission }) => {
+  const categoryEmojis: Record<string, string> = {
+    delivery: "🚛",
+    pet: "🐕",
+    shopping: "🛒",
+    handyman: "🔨",
+    cleaning: "✨",
+    moving: "📦",
+  };
+
+  return (
+    <MissionCardV2
+      title={mission.title || "Titolo missione"}
+      description={mission.description || "Descrizione della missione"}
+      price={parseFloat(mission.price) || 0}
+      escrowAmount={parseFloat(mission.price) || 0}
+      isKYCVerified={true}
+      location={mission.location || "Località"}
+      deadline={mission.duration}
+      category={mission.category as any}
+      onAccept={() => {}}
+    />
+  );
+};
 
 const CreateMission = () => {
   const navigate = useNavigate();
@@ -221,38 +230,46 @@ const CreateMission = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background lg:ml-64 pb-6">
+    <div className="min-h-screen bg-canvas lg:ml-64 pb-20">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border/50">
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              onClick={() => currentStep > 1 ? handleBack() : navigate("/dashboard")}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-foreground">Crea missione</h1>
-          </div>
+      <div className="sticky top-0 z-10 bg-canvas/95 backdrop-blur-lg border-b border-border-default">
+        <div className="px-4 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+            onClick={() => currentStep > 1 ? handleBack() : navigate("/dashboard")}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {currentStep > 1 ? "Indietro" : "Esci"}
+          </Button>
         </div>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="px-4 py-6 max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-text-primary mb-2">Crea una nuova missione</h1>
+          <p className="text-sm text-text-muted">
+            Step {currentStep} di {totalSteps}
+          </p>
+        </div>
+
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
         {/* Step 1: Title and Description */}
         {currentStep === 1 && (
-          <Card className="p-6 bg-card shadow-card border-0">
+          <Card className="p-6 bg-surface shadow-elegant">
             <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-foreground mb-2">Descrivi la tua missione</h2>
-              <p className="text-muted-foreground">Sii chiaro e dettagliato per attirare i migliori runner</p>
+              <div className="w-16 h-16 bg-brand-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">📝</span>
+              </div>
+              <h2 className="text-xl font-bold text-text-primary mb-2">Descrivi la tua missione</h2>
+              <p className="text-sm text-text-muted">Sii chiaro e dettagliato per attirare i migliori runner</p>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <Label htmlFor="title" className="text-sm font-medium">
+                <Label htmlFor="title" className="text-sm font-semibold text-text-primary mb-2 block">
                   Titolo missione *
                 </Label>
                 <Input
@@ -260,12 +277,12 @@ const CreateMission = () => {
                   value={mission.title}
                   onChange={(e) => setMission({ ...mission, title: e.target.value })}
                   placeholder="es. Consegna pacchi centro città"
-                  className="mt-1"
+                  className="h-11"
                 />
               </div>
               
               <div>
-                <Label htmlFor="description" className="text-sm font-medium">
+                <Label htmlFor="description" className="text-sm font-semibold text-text-primary mb-2 block">
                   Descrizione dettagliata *
                 </Label>
                 <Textarea
@@ -273,11 +290,16 @@ const CreateMission = () => {
                   value={mission.description}
                   onChange={(e) => setMission({ ...mission, description: e.target.value })}
                   placeholder="Spiega cosa deve fare il runner, includi tutti i dettagli importanti..."
-                  className="mt-1 min-h-[120px] resize-none"
+                  className="min-h-[140px] resize-none"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {mission.description.length}/500 caratteri
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-text-muted">
+                    {mission.description.length}/500 caratteri
+                  </p>
+                  {mission.description.length > 400 && (
+                    <span className="text-xs text-warning-500">Quasi al limite</span>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
@@ -434,7 +456,7 @@ const CreateMission = () => {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="flex-1"
+              className="flex-1 h-12"
             >
               Indietro
             </Button>
@@ -444,15 +466,15 @@ const CreateMission = () => {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="flex-1 h-12 bg-brand-primary text-white hover:bg-brand-primary/90 font-semibold"
             >
-              Avanti
+              Continua
             </Button>
           ) : (
             <Button
               onClick={handleSubmit}
               disabled={!canProceed()}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="flex-1 h-12 bg-success-500 text-white hover:bg-success-500/90 font-semibold"
             >
               Pubblica missione
             </Button>
