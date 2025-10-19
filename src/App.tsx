@@ -13,7 +13,7 @@ import Landing from "./pages/Landing";
 import OnboardingWrapper from "./pages/OnboardingWrapper";
 import CommunityDashboard from "./pages/CommunityDashboard";
 import Missions from "./pages/Missions";
-import MissionDetails from "./pages/MissionDetails";
+import MissionDetailsNew from "./pages/MissionDetailsNew";
 import Chat from "./pages/Chat";
 import Wallet from "./pages/Wallet";
 import Profile from "./pages/Profile";
@@ -46,8 +46,8 @@ const AppContent = () => {
     <div className="flex min-h-screen w-full">
       <DesktopSidebar />
       <div className={cn(
-        "flex-1 transition-all duration-300",
-        isOpen ? "lg:ml-64" : "lg:ml-16"
+        "flex-1 w-full transition-all duration-300",
+        isDesktop && (isOpen ? "lg:ml-64" : "lg:ml-16")
       )}>
         <Routes>
         <Route path="/" element={<Landing />} />
@@ -74,7 +74,7 @@ const AppContent = () => {
           path="/missions/:id"
           element={(
             <ProtectedRoute allowGuest>
-              <MissionDetails />
+              <MissionDetailsNew />
             </ProtectedRoute>
           )}
         />

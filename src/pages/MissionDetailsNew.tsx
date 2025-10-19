@@ -214,9 +214,12 @@ const MissionDetailsNew = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-canvas pb-20 lg:ml-64">
+      <div className="min-h-screen bg-canvas pb-20 lg:pb-6">
         {/* Minimal Header */}
-        <div className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-xl border-b border-border-default/50">
+        <div 
+          className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-xl border-b border-border-default/50"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        >
           <div className="px-4 py-2 flex items-center justify-between max-w-3xl mx-auto">
             <Button
               variant="ghost"
@@ -371,7 +374,10 @@ const MissionDetailsNew = () => {
         {/* Bottom Actions - Fixed, non-intrusive */}
         {(userRole === "guest" || (userRole === "runner" && mission.status === "open") || 
           (userRole === "runner" && mission.status === "in_progress" && !showProofUpload)) && (
-          <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-canvas/95 backdrop-blur-xl border-t border-border-default z-20">
+          <div 
+            className="fixed bottom-0 left-0 right-0 bg-canvas/95 backdrop-blur-xl border-t border-border-default z-20 lg:hidden"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 60px)' }}
+          >
             <div className="px-4 py-3 max-w-3xl mx-auto">
               {userRole === "guest" && (
                 <div className="flex items-center gap-3">

@@ -230,7 +230,7 @@ const CreateMission = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas lg:ml-64 pb-20">
+    <div className="min-h-screen bg-canvas pb-20 lg:pb-6">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-canvas/95 backdrop-blur-lg border-b border-border-default">
         <div className="px-4 py-3">
