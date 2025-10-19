@@ -214,85 +214,108 @@ const MissionDetailsNew = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-canvas pb-6 lg:ml-64">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-canvas/95 backdrop-blur-lg border-b border-border-default">
-          <div className="px-4 py-3">
+      <div className="min-h-screen bg-canvas pb-20 lg:ml-64">
+        {/* Minimal Header */}
+        <div className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-xl border-b border-border-default/50">
+          <div className="px-4 py-2 flex items-center justify-between max-w-3xl mx-auto">
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2"
+              className="gap-1.5 -ml-2 text-text-muted hover:text-text-primary"
               onClick={() => navigate("/missions")}
             >
               <ArrowLeft className="w-4 h-4" />
-              Indietro
+              <span className="text-sm">Missioni</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowReportModal(true)}
+              className="text-text-muted hover:text-text-primary -mr-2"
+            >
+              <Flag className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
-        <div className="px-4 py-4 space-y-4 max-w-3xl mx-auto">
-          {/* Hero Card */}
-          <Card className="p-6 bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 border-brand-primary/20">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-14 h-14 bg-surface rounded-xl flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
+        <div className="px-4 py-6 space-y-6 max-w-3xl mx-auto animate-fade-in">
+          {/* Hero Section - Fluid */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 rounded-2xl flex items-center justify-center flex-shrink-0 text-3xl border border-brand-primary/10">
                 {mission.mission_categories?.icon || '⭐'}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-2 mb-1">
-                  <h1 className="text-xl font-bold text-text-primary flex-1">
+                <div className="flex items-start gap-2 mb-2">
+                  <h1 className="text-2xl font-bold text-text-primary flex-1 leading-tight">
                     {mission.title}
                   </h1>
-                  <Badge variant={statusBadge.variant} className="flex-shrink-0">
+                  <Badge variant={statusBadge.variant} className="text-xs flex-shrink-0">
                     {statusBadge.label}
                   </Badge>
                 </div>
-                <p className="text-sm text-text-muted">{mission.mission_categories?.name}</p>
-              </div>
-            </div>
-            
-            <Separator className="my-4" />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-text-muted mb-1">Compenso</p>
-                <p className="text-3xl font-bold text-brand-primary">€{mission.price.toFixed(2)}</p>
-              </div>
-              {mission.duration_hours && (
-                <div className="text-right">
-                  <p className="text-sm text-text-muted mb-1">Durata</p>
-                  <p className="text-lg font-semibold text-text-primary">{mission.duration_hours}h</p>
+                <p className="text-sm text-text-muted mb-3">{mission.mission_categories?.name}</p>
+                
+                {/* Inline Details */}
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1.5 text-text-muted">
+                    <MapPin className="w-4 h-4" />
+                    <span>{mission.location}</span>
+                  </div>
+                  {mission.duration_hours && (
+                    <div className="flex items-center gap-1.5 text-text-muted">
+                      <Clock className="w-4 h-4" />
+                      <span>{mission.duration_hours}h</span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-          </Card>
 
-          {/* Escrow Widget - Compact */}
+            {/* Compensation - Prominent but clean */}
+            <Card className="p-4 bg-gradient-to-r from-success-500/5 to-brand-primary/5 border-success-500/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5">Compenso garantito</p>
+                  <p className="text-3xl font-bold text-success-600 dark:text-success-400">€{mission.price.toFixed(2)}</p>
+                </div>
+                {mission.status !== 'open' && mission.status !== 'cancelled' && (
+                  <div className="text-right">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success-500/10 text-success-700 dark:text-success-300">
+                      <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
+                      <span className="text-xs font-medium">Protetto</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+
+          {/* Progress Timeline - Only when relevant */}
           {mission.status !== 'open' && mission.status !== 'cancelled' && (
-            <EscrowWidget
-              amount={mission.price}
-              status={
-                mission.status === 'in_progress' ? 'in_progress' :
-                mission.status === 'pending_completion' ? 'pending_release' :
-                mission.status === 'completed' ? 'released' : 'reserved'
-              }
-              daysUntilAutoRelease={mission.status === 'pending_completion' ? 7 : undefined}
-            />
-          )}
-
-          {/* Progress Timeline */}
-          {mission.status !== 'open' && (
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold text-text-primary mb-3">Avanzamento</h3>
-              <Progress value={progress} className="h-2 mb-3" />
-              <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="relative">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wide">Avanzamento</h3>
+                <span className="text-xs text-text-muted">{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-1.5 mb-4" />
+              <div className="flex items-center justify-between">
                 {completionSteps.map((step, i) => (
-                  <div key={i} className="space-y-1">
-                    <CheckCircle2 className={cn(
-                      "w-5 h-5 mx-auto",
-                      step.done ? "text-success-500" : "text-neutral-300 dark:text-neutral-600"
-                    )} />
+                  <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
+                      step.done 
+                        ? "bg-success-500 text-white shadow-sm" 
+                        : "bg-surface border-2 border-border-default"
+                    )}>
+                      {step.done ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-border-default" />
+                      )}
+                    </div>
                     <p className={cn(
-                      "text-xs",
+                      "text-xs text-center",
                       step.done ? "text-text-primary font-medium" : "text-text-muted"
                     )}>
                       {step.label}
@@ -300,68 +323,41 @@ const MissionDetailsNew = () => {
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           )}
 
-          {/* Owner Info */}
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Creatore</h3>
+          {/* Description - Clean */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-text-primary">Descrizione</h3>
+            <p className="text-sm text-text-secondary leading-relaxed">{mission.description}</p>
+          </div>
+
+          {/* Owner Info - Inline */}
+          <Card className="p-4 hover:bg-surface-hover transition-colors cursor-pointer" onClick={() => navigate('/profile')}>
             <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12">
+              <Avatar className="w-11 h-11 border-2 border-border-default">
                 <AvatarImage src={mission.profiles.avatar_url} />
-                <AvatarFallback className="bg-brand-secondary/10 text-brand-secondary font-semibold">
+                <AvatarFallback className="bg-brand-secondary/10 text-brand-secondary font-semibold text-sm">
                   {ownerInitials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-text-primary">{ownerName}</h4>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h4 className="font-medium text-text-primary text-sm">{ownerName}</h4>
                   {mission.profiles.is_verified && (
-                    <Badge variant="success" className="text-xs">Verificato</Badge>
+                    <CheckCircle2 className="w-4 h-4 text-success-500 flex-shrink-0" />
                   )}
                 </div>
-                <div className="flex items-center gap-1 text-sm">
-                  <Star className="w-4 h-4 fill-warning-500 text-warning-500" />
-                  <span className="text-text-muted">
-                    {mission.profiles.rating_average?.toFixed(1) || '5.0'} ({mission.profiles.rating_count || 0})
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5 fill-warning-500 text-warning-500" />
+                  <span className="text-xs text-text-muted">
+                    {mission.profiles.rating_average?.toFixed(1) || '5.0'} · {mission.profiles.rating_count || 0} recensioni
                   </span>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
-                <User className="w-4 h-4" />
-              </Button>
+              <User className="w-4 h-4 text-text-muted flex-shrink-0" />
             </div>
           </Card>
-
-          {/* Description */}
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold text-text-primary mb-2">Descrizione</h3>
-            <p className="text-sm text-text-primary leading-relaxed">{mission.description}</p>
-          </Card>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-text-muted mb-1">Località</p>
-                  <p className="text-sm font-medium text-text-primary">{mission.location}</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-start gap-2">
-                <Clock className="w-5 h-5 text-brand-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-text-muted mb-1">Durata</p>
-                  <p className="text-sm font-medium text-text-primary">
-                    {mission.duration_hours ? `${mission.duration_hours}h` : 'Flessibile'}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
 
           {/* Proof Upload Section */}
           {mission.status === 'in_progress' && userRole === 'runner' && showProofUpload && (
@@ -370,51 +366,57 @@ const MissionDetailsNew = () => {
               onComplete={handleProofComplete}
             />
           )}
+        </div>
 
-          {/* Actions */}
-          <div className="space-y-3">
-            {userRole === "guest" && (
-              <Card className="p-4 bg-info-500/5 border-info-500/20 text-center">
-                <p className="text-sm text-text-muted mb-3">
-                  Accedi per candidarti a questa missione
-                </p>
-                <Button onClick={() => navigate('/')} className="w-full">
-                  Accedi o Registrati
-                </Button>
-              </Card>
-            )}
-
-            {userRole === "runner" && mission.status === "open" && (
-              <>
-                <Button
-                  onClick={() => setShowApplicationModal(true)}
-                  className="w-full h-12 bg-brand-primary text-white hover:bg-brand-primary/90 font-semibold"
-                >
-                  Candidati per questa missione
-                </Button>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" onClick={() => navigate(`/chat/${mission.id}`)}>
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Contatta
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowReportModal(true)} className="text-error-500 border-error-500/20">
-                    <Flag className="w-4 h-4 mr-2" />
-                    Segnala
+        {/* Bottom Actions - Fixed, non-intrusive */}
+        {(userRole === "guest" || (userRole === "runner" && mission.status === "open") || 
+          (userRole === "runner" && mission.status === "in_progress" && !showProofUpload)) && (
+          <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-canvas/95 backdrop-blur-xl border-t border-border-default z-20">
+            <div className="px-4 py-3 max-w-3xl mx-auto">
+              {userRole === "guest" && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs text-text-muted mb-0.5">Accedi per candidarti</p>
+                    <p className="text-sm font-medium text-text-primary">Inizia ora</p>
+                  </div>
+                  <Button onClick={() => navigate('/')} size="sm" className="px-6">
+                    Accedi
                   </Button>
                 </div>
-              </>
-            )}
+              )}
 
-            {userRole === "runner" && mission.status === "in_progress" && !showProofUpload && (
-              <Button
-                onClick={() => setShowProofUpload(true)}
-                className="w-full h-12 bg-success-500 text-white hover:bg-success-500/90 font-semibold"
-              >
-                Carica prova di completamento
-              </Button>
-            )}
+              {userRole === "runner" && mission.status === "open" && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/chat/${mission.id}`)}
+                    className="flex-shrink-0"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setShowApplicationModal(true)}
+                    size="sm"
+                    className="flex-1 font-medium"
+                  >
+                    Candidati
+                  </Button>
+                </div>
+              )}
+
+              {userRole === "runner" && mission.status === "in_progress" && !showProofUpload && (
+                <Button
+                  onClick={() => setShowProofUpload(true)}
+                  size="sm"
+                  className="w-full bg-success-500 hover:bg-success-600 text-white font-medium"
+                >
+                  Carica completamento
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modals */}
