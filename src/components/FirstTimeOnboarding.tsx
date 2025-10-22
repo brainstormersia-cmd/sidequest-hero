@@ -61,12 +61,11 @@ const RoleCard = ({ option, isSelected, onSelect }: RoleCardProps) => {
       onClick={() => onSelect(option)}
       className={cn(
         "group relative w-full rounded-[16px] border border-transparent bg-white p-6 text-left text-[#0B0C0E] transition-colors duration-[120ms] ease-out",
+        "shadow-[0_16px_44px_rgba(15,23,42,0.06)] hover:shadow-[0_24px_56px_rgba(15,23,42,0.09)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4F8BFF]",
         "motion-safe:transform motion-safe:transition-transform motion-safe:duration-[120ms] motion-safe:ease-out",
         "motion-reduce:transform-none motion-reduce:transition-none",
-        isSelected
-          ? "border-[#4F8BFF] shadow-[0_20px_48px_rgba(16,29,72,0.18)] motion-safe:scale-[1.02]"
-          : "border-[#E3E5EA] hover:border-[#4F8BFF]/60 hover:shadow-[0_20px_40px_rgba(16,29,72,0.12)]"
+        isSelected && "shadow-[0_28px_64px_rgba(45,90,185,0.18)] motion-safe:scale-[1.02]"
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -88,7 +87,7 @@ const RoleCard = ({ option, isSelected, onSelect }: RoleCardProps) => {
       <p className="mt-6 text-sm leading-relaxed text-[#4B4F59]">{option.description}</p>
       <span
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-[16px] border border-[#4F8BFF]",
+          "pointer-events-none absolute inset-0 rounded-[16px] border border-[#4F8BFF] transition-opacity duration-150 ease-out",
           isSelected ? "opacity-100" : "opacity-0"
         )}
         aria-hidden="true"
